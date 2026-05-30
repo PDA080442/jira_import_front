@@ -1,0 +1,10 @@
+#!/usr/bin/env sh
+
+PRETTIER="$(dirname "$0")/../node_modules/.bin/prettier"
+
+git diff --cached --name-only --diff-filter=ACMR | while IFS= read -r file; do
+  [ -n "$file" ] || continue
+  "$PRETTIER" --write --ignore-unknown "$file"
+done
+
+git update-index --again
