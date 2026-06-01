@@ -15,6 +15,26 @@ const router = createRouter({
       name: 'about',
       component: () => import('@/views/AboutView.vue'),
     },
+    {
+      path: '/auth/login',
+      name: 'auth-login',
+      component: () => import('@/views/auth/LoginPage.vue'),
+    },
+    {
+      path: '/auth/register',
+      name: 'auth-register',
+      component: () => import('@/views/auth/RegisterPage.vue'),
+    },
+    {
+      path: '/auth/forgot-password',
+      name: 'auth-forgot-password',
+      component: () => import('@/views/auth/ForgotPasswordPage.vue'),
+    },
+    {
+      path: '/workspace/select',
+      name: 'workspace-select',
+      component: () => import('@/views/workspace/WorkspaceSelectView.vue'),
+    },
   ],
 })
 

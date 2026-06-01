@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 60 56" fill="none">
+  <path d="M16 52V38" stroke="#16A34A" stroke-width="2.2" stroke-linecap="round" />
+  <path d="M16 38 9 52h14L16 38Z" fill="#16A34A" />
+  <path d="M16 30 6 44h20L16 30Z" fill="#16A34A" />
+  <path d="M16 22 8 36h16L16 22Z" fill="#15803D" />
+  <path d="M16 14 11 24h10L16 14Z" fill="#16A34A" />
+
+  <path d="M38 52V42" stroke="#16A34A" stroke-width="2.2" stroke-linecap="round" />
+  <path d="M38 42 31 52h14L38 42Z" fill="#16A34A" />
+  <path d="M38 34 29 48h18L38 34Z" fill="#16A34A" />
+  <path d="M38 26 32 38h12L38 26Z" fill="#15803D" />
+</svg>
