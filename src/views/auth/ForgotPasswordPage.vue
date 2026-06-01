@@ -1,6 +1,6 @@
 <template>
-  <AuthLayout show-header-logo>
-    <AuthCard>
+  <AuthLayout show-header-logo no-scroll>
+    <AuthCard :max-width="480">
       <ForgotPasswordForm />
     </AuthCard>
   </AuthLayout>

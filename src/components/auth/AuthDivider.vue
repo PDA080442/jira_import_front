@@ -7,6 +7,9 @@
 </template>
 
 <style scoped>
+.auth-divider {
+  margin-top: 10px;
+}
 .auth-divider__text {
   font-size: 0.875rem;
   white-space: nowrap;

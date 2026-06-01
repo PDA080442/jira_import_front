@@ -1,6 +1,6 @@
 <template>
-  <AuthLayout>
-    <AuthCard :max-width="500">
+  <AuthLayout no-scroll>
+    <AuthCard :max-width="500" tall>
       <RegisterForm />
     </AuthCard>
   </AuthLayout>

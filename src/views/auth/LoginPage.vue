@@ -1,6 +1,6 @@
 <template>
-  <AuthLayout>
-    <AuthCard>
+  <AuthLayout no-scroll>
+    <AuthCard :max-width="480">
       <LoginForm />
     </AuthCard>
   </AuthLayout>

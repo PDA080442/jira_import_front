@@ -2,45 +2,22 @@
   <div
     class="auth-logo"
     :class="{
-      'auth-logo--card mb-6': variant === 'card' || !variant,
-      'auth-logo--register mb-4': variant === 'register',
+      'auth-logo--card': variant === 'card' || !variant,
+      'auth-logo--register': variant === 'register',
       'auth-logo--header': variant === 'header',
     }"
   >
     <img
-      v-if="variant === 'register'"
-      :src="logoTrees"
-      alt=""
-      class="auth-logo__mark auth-logo__mark--trees"
-      width="60"
-      height="56"
+      :src="logoPrimary"
+      alt="Sowline"
+      class="auth-logo__image"
+      :class="`auth-logo__image--${variant ?? 'card'}`"
     />
-
-    <img
-      v-else
-      :src="logoShield"
-      alt=""
-      class="auth-logo__mark auth-logo__mark--shield"
-      :width="variant === 'header' ? 36 : 44"
-      :height="variant === 'header' ? 40 : 48"
-    />
-
-    <div class="auth-logo__text" :class="{ 'auth-logo__text--stacked': variant === 'register' }">
-      <template v-if="variant === 'register'">
-        <span class="auth-logo__title">Backlog</span>
-        <span class="auth-logo__title auth-logo__title--accent">Import</span>
-      </template>
-
-      <template v-else>
-        <span class="auth-logo__title">Backlog Import</span>
-      </template>
-    </div>
   </div>
 </template>
 
 <script setup lang="ts">
-import logoShield from '@/assets/auth/logo-shield.svg'
-import logoTrees from '@/assets/auth/logo-trees.svg'
+import logoPrimary from '@/assets/logo/logo-primary.png'
 
 defineProps<{
   variant?: 'card' | 'register' | 'header'
@@ -50,53 +27,21 @@ defineProps<{
 <style scoped>
 .auth-logo {
   display: flex;
-  align-items: center;
-  gap: 12px;
+  align-items: flex-start;
+  overflow: visible;
+}
+
+.auth-logo--card {
+  justify-content: flex-start;
+  height: 44px;
+  margin-bottom: 24px;
 }
 
 .auth-logo--register {
   justify-content: center;
-  align-items: center;
   width: 100%;
-  gap: 10px;
-}
-
-.auth-logo__mark {
-  display: block;
-  flex-shrink: 0;
-}
-
-.auth-logo__mark--trees {
-  width: 60px;
   height: 56px;
-}
-
-.auth-logo__text {
-  display: flex;
-  align-items: center;
-}
-
-.auth-logo__text--stacked {
-  flex-direction: column;
-  align-items: center;
-  gap: 0;
-  line-height: 1.1;
-  text-align: center;
-}
-
-.auth-logo__title {
-  font-size: 1.25rem;
-  font-weight: 700;
-  color: #1c1917;
-  letter-spacing: -0.01em;
-}
-
-.auth-logo--register .auth-logo__title {
-  font-size: 1rem;
-}
-
-.auth-logo__title--accent {
-  color: #16a34a;
+  margin-bottom: 16px;
 }
 
 .auth-logo--header {
@@ -104,5 +49,30 @@ defineProps<{
   top: 28px;
   left: 40px;
   z-index: 2;
+  justify-content: flex-start;
+  height: 36px;
+}
+
+.auth-logo__image {
+  display: block;
+  width: auto;
+  object-fit: contain;
+  transform: scale(2);
+}
+
+.auth-logo__image--card {
+  height: 44px;
+  transform-origin: left top;
+}
+
+.auth-logo__image--register {
+  margin-top: -30px;
+  height: 65px;
+  transform-origin: center top;
+}
+
+.auth-logo__image--header {
+  height: 36px;
+  transform-origin: left top;
 }
 </style>

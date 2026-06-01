@@ -1,5 +1,5 @@
 <template>
-  <div class="auth-layout">
+  <div class="auth-layout" :class="{ 'auth-layout--no-scroll': noScroll }">
     <AuthLogo v-if="showHeaderLogo" variant="header" />
 
     <div
@@ -15,12 +15,50 @@
 </template>
 
 <script setup lang="ts">
+import { onMounted, onUnmounted } from 'vue'
+
 import forestBackground from '@/assets/auth/forest-background.png'
 import AuthLogo from '@/components/auth/AuthLogo.vue'
 
-defineProps<{
+const props = defineProps<{
   showHeaderLogo?: boolean
+  noScroll?: boolean
 }>()
+
+let savedOverflow = ''
+
+const lockScroll = () => {
+  savedOverflow = document.documentElement.style.overflow
+  document.documentElement.style.overflow = 'hidden'
+  document.body.style.overflow = 'hidden'
+
+  const main = document.querySelector('.v-main')
+  if (main instanceof HTMLElement) {
+    main.style.overflow = 'hidden'
+  }
+}
+
+const unlockScroll = () => {
+  document.documentElement.style.overflow = savedOverflow
+  document.body.style.overflow = ''
+
+  const main = document.querySelector('.v-main')
+  if (main instanceof HTMLElement) {
+    main.style.overflow = ''
+  }
+}
+
+onMounted(() => {
+  if (props.noScroll) {
+    lockScroll()
+  }
+})
+
+onUnmounted(() => {
+  if (props.noScroll) {
+    unlockScroll()
+  }
+})
 </script>
 
 <style scoped>
@@ -33,6 +71,17 @@ defineProps<{
   min-height: 100dvh;
   overflow: hidden;
   background-color: #fafaf9;
+}
+
+.auth-layout--no-scroll {
+  height: 100dvh;
+  max-height: 100dvh;
+  min-height: 100dvh;
+}
+
+.auth-layout--no-scroll .auth-layout__content {
+  max-height: 100%;
+  overflow: hidden;
 }
 
 .auth-layout__bg {
