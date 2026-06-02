@@ -32,20 +32,21 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 72px;
-  height: 72px;
+  width: 64px;
+  height: 64px;
   border-radius: 50%;
-  background: rgba(74, 222, 128, 0.22);
+  background: #ecfdf5;
 }
 
 .auth-success-box {
   display: flex;
-  gap: 12px;
-  padding: 16px;
-  border-radius: 12px;
-  border: 1px solid rgba(22, 163, 74, 0.35);
+  align-items: flex-start;
+  gap: 10px;
+  padding: 14px 16px;
+  border-radius: 10px;
+  border: 1px solid rgba(22, 163, 74, 0.28);
   background: #ecfdf5;
-  color: #15803d;
+  color: #166534;
   text-align: left;
 }
 

@@ -51,7 +51,7 @@ defineProps<{
   left: 40px;
   z-index: 2;
   justify-content: flex-start;
-  height: 36px;
+  height: 44px;
 }
 
 .auth-logo__image {
@@ -74,7 +74,7 @@ defineProps<{
 }
 
 .auth-logo__image--header {
-  height: 36px;
+  height: 44px;
   transform-origin: left top;
 }
 </style>
