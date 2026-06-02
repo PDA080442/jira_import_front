@@ -32,8 +32,9 @@ defineProps<{
 }
 
 .auth-logo--card {
-  justify-content: flex-start;
-  height: 44px;
+  justify-content: center;
+  width: 100%;
+  height: 56px;
   margin-bottom: 24px;
 }
 
@@ -61,8 +62,9 @@ defineProps<{
 }
 
 .auth-logo__image--card {
-  height: 44px;
-  transform-origin: left top;
+  margin-top: -30px;
+  height: 65px;
+  transform-origin: center top;
 }
 
 .auth-logo__image--register {
