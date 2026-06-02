@@ -33,6 +33,7 @@
           :error-messages="fieldErrors.slug"
           :disabled="loading"
           class="workspace-create-form__slug-input"
+          @update:model-value="handleSlugChange"
         />
       </div>
       <div class="workspace-create-form__hint">
@@ -58,42 +59,118 @@
     </div>
 
     <div class="workspace-create-form__actions">
-      <v-btn variant="outlined" class="text-none" :disabled="loading" to="/workspace/select">
+      <v-btn variant="outlined" class="text-none" :disabled="loading" @click="emit('cancel')">
         Отмена
       </v-btn>
       <v-btn type="submit" color="primary" class="text-none" :loading="loading">
-        Создать workspace
+        {{ submitLabel }}
       </v-btn>
     </div>
   </v-form>
 </template>
 
 <script setup lang="ts">
-import { ref } from 'vue'
+import { computed, ref, watch } from 'vue'
 
 import { useWorkspaceMock } from '@/composables/useWorkspaceMock'
-import { slugify } from '@/mocks/workspace'
+import { slugify, type Workspace } from '@/mocks/workspace'
 
-const { loading, fieldErrors, handleCreateWorkspace } = useWorkspaceMock()
+const props = defineProps<{
+  workspace?: Workspace | null
+}>()
+
+const emit = defineEmits<{
+  cancel: []
+  success: [workspace: Workspace]
+}>()
+
+const { loading, fieldErrors, handleCreateWorkspace, handleUpdateWorkspace, resetState } =
+  useWorkspaceMock()
 
 const name = ref('')
 const slug = ref('')
 const description = ref('')
 const slugManuallyEdited = ref(false)
 
-const handleNameChange = (value: string) => {
-  if (!slugManuallyEdited.value) {
-    slug.value = slugify(value)
+const isEditMode = computed(() => Boolean(props.workspace))
+const submitLabel = computed(() => (isEditMode.value ? 'Сохранить' : 'Создать workspace'))
+
+const fillForm = (workspace: Workspace | null | undefined) => {
+  if (!workspace) {
+    resetForm()
+    return
   }
+
+  name.value = workspace.name
+  slug.value = workspace.slug
+  description.value = workspace.description ?? ''
+  slugManuallyEdited.value = true
+  resetState()
+}
+
+const resetForm = () => {
+  name.value = ''
+  slug.value = ''
+  description.value = ''
+  slugManuallyEdited.value = false
+  resetState()
+}
+
+const handleNameChange = (value: string) => {
+  if (isEditMode.value || slugManuallyEdited.value) {
+    return
+  }
+
+  slug.value = slugify(value)
+}
+
+const handleSlugChange = () => {
+  slugManuallyEdited.value = true
 }
 
 const handleSubmit = async () => {
-  await handleCreateWorkspace({
-    name: name.value,
-    slug: slug.value,
-    description: description.value,
-  })
+  if (isEditMode.value && props.workspace) {
+    const workspace = await handleUpdateWorkspace({
+      id: props.workspace.id,
+      name: name.value,
+      slug: slug.value,
+      description: description.value,
+    })
+
+    if (workspace) {
+      emit('success', workspace)
+      resetForm()
+    }
+
+    return
+  }
+
+  const workspace = await handleCreateWorkspace(
+    {
+      name: name.value,
+      slug: slug.value,
+      description: description.value,
+    },
+    { redirect: false },
+  )
+
+  if (workspace) {
+    emit('success', workspace)
+    resetForm()
+  }
 }
+
+watch(
+  () => props.workspace,
+  (workspace) => {
+    fillForm(workspace)
+  },
+  { immediate: true },
+)
+
+defineExpose({
+  resetForm,
+})
 </script>
 
 <style scoped>

@@ -21,7 +21,7 @@ const props = withDefaults(
     collapsedWidth?: number
   }>(),
   {
-    expandedWidth: 260,
+    expandedWidth: 228,
     collapsedWidth: 72,
   },
 )
@@ -59,6 +59,22 @@ const shellStyle = computed(() => ({
 
 .app-sidebar-shell--expanded .app-sidebar-shell__inner {
   width: var(--sidebar-expanded-width);
+}
+
+.app-sidebar-shell--expanded :deep(.workspace-sidebar__inner) {
+  padding: 16px 6px 16px;
+}
+
+.app-sidebar-shell--expanded :deep(.app-sidebar__collapsible) {
+  margin-left: 0;
+}
+
+.app-sidebar-shell--expanded :deep(.workspace-sidebar__profile) {
+  padding: 8px 6px;
+}
+
+.app-sidebar-shell--expanded :deep(.workspace-sidebar__section-label) {
+  padding: 0 2px 8px;
 }
 
 .app-sidebar-shell :deep(.v-list) {

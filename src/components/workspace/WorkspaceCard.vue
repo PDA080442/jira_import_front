@@ -3,8 +3,9 @@
     class="workspace-card"
     :class="{ 'workspace-card--selected': selected }"
     variant="outlined"
-    rounded="xl"
+    rounded="lg"
     @click="emit('select')"
+    @contextmenu.prevent="emit('contextmenu', $event)"
   >
     <v-card-text class="workspace-card__body">
       <div class="workspace-card__header">
@@ -17,16 +18,16 @@
         </div>
       </div>
 
-      <v-divider class="my-4" />
+      <v-divider class="workspace-card__divider" />
 
       <div class="workspace-card__meta">
         <div class="workspace-card__meta-row">
-          <v-icon icon="mdi-account-group-outline" size="18" color="grey" />
+          <v-icon icon="mdi-account-group-outline" size="16" class="workspace-card__meta-icon" />
           <span class="workspace-card__meta-label">Участники</span>
           <span class="workspace-card__meta-value">{{ membersLabel }}</span>
         </div>
         <div class="workspace-card__meta-row">
-          <v-icon icon="mdi-clock-outline" size="18" color="grey" />
+          <v-icon icon="mdi-clock-outline" size="16" class="workspace-card__meta-icon" />
           <span class="workspace-card__meta-label">Последняя активность</span>
           <span class="workspace-card__meta-value">{{ workspace.lastActivityLabel }}</span>
         </div>
@@ -48,6 +49,7 @@ const props = defineProps<{
 
 const emit = defineEmits<{
   select: []
+  contextmenu: [event: MouseEvent]
 }>()
 
 const iconMap: Record<WorkspaceIcon, string> = {
@@ -76,14 +78,15 @@ const membersLabel = computed(() => {
 <style scoped>
 .workspace-card {
   cursor: pointer;
-  border-color: #e7e5e4 !important;
+  border: 1px solid #e7e5e4 !important;
+  box-shadow: none !important;
   transition:
     border-color 0.2s ease,
     box-shadow 0.2s ease;
 }
 
 .workspace-card:hover {
-  box-shadow: 0 4px 16px rgba(28, 25, 23, 0.06);
+  box-shadow: 0 4px 16px rgba(28, 25, 23, 0.06) !important;
 }
 
 .workspace-card--selected {
@@ -96,7 +99,7 @@ const membersLabel = computed(() => {
 
 .workspace-card__header {
   display: flex;
-  gap: 14px;
+  gap: 12px;
 }
 
 .workspace-card__icon {
@@ -115,26 +118,38 @@ const membersLabel = computed(() => {
   flex-direction: column;
   gap: 8px;
   min-width: 0;
+  padding-top: 2px;
 }
 
 .workspace-card__title {
-  font-size: 1.0625rem;
+  margin: 0;
+  font-size: 1rem;
   font-weight: 700;
   color: #1c1917;
   line-height: 1.3;
 }
 
+.workspace-card__divider {
+  margin: 16px 0;
+  border-color: #f5f5f4;
+  opacity: 1;
+}
+
 .workspace-card__meta {
   display: flex;
   flex-direction: column;
-  gap: 10px;
+  gap: 12px;
 }
 
 .workspace-card__meta-row {
   display: grid;
-  grid-template-columns: 18px 1fr auto;
+  grid-template-columns: 16px 1fr auto;
   align-items: center;
   gap: 8px;
+}
+
+.workspace-card__meta-icon {
+  color: #a8a29e;
 }
 
 .workspace-card__meta-label {

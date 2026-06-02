@@ -4,7 +4,7 @@
       v-for="index in count"
       :key="index"
       variant="outlined"
-      rounded="xl"
+      rounded="lg"
       class="workspace-skeleton-grid__card"
     >
       <v-card-text class="pa-5">
@@ -44,13 +44,13 @@ withDefaults(
   border-color: #e7e5e4 !important;
 }
 
-@media (max-width: 1200px) {
+@media (max-width: 600px) {
   .workspace-skeleton-grid {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 }
 
-@media (max-width: 768px) {
+@media (max-width: 480px) {
   .workspace-skeleton-grid {
     grid-template-columns: 1fr;
   }

@@ -168,8 +168,11 @@ const isActive = (path?: string) => {
 }
 
 .workspace-sidebar__logo-image--expanded {
+  margin-right: 60px;
   max-height: 96px;
   object-position: center center;
+  transform: scale(1.32);
+  transform-origin: center center;
 }
 
 .app-sidebar__collapsible {

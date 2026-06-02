@@ -19,7 +19,7 @@ withDefaults(
     sidebarExpandedWidth?: number
   }>(),
   {
-    sidebarExpandedWidth: 260,
+    sidebarExpandedWidth: 228,
   },
 )
 </script>

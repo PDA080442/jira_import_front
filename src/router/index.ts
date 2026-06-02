@@ -35,8 +35,7 @@ const router = createRouter({
     },
     {
       path: '/workspace/create',
-      name: 'workspace-create',
-      component: () => import('@/views/workspace/WorkspaceCreatePage.vue'),
+      redirect: { path: '/workspace/select', query: { create: '1' } },
     },
     {
       path: '/workspace/members',

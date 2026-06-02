@@ -6,14 +6,18 @@ import {
   acceptInvite,
   createWorkspace,
   declineInvite,
+  deleteWorkspace,
+  duplicateWorkspace,
   fetchInvite,
   fetchMembers,
   fetchWorkspaces,
   inviteMember,
   removeMember,
   updateMemberRole,
+  updateWorkspace,
   type CreateWorkspacePayload,
   type InviteMemberPayload,
+  type UpdateWorkspacePayload,
   type WorkspaceMember,
   type WorkspaceRole,
 } from '@/mocks/workspace'
@@ -56,12 +60,21 @@ export const useWorkspaceMock = () => {
     }
   }
 
-  const handleSelectWorkspace = async (workspaceId: string) => {
+  const handleSelectWorkspace = async (
+    workspaceId: string,
+    options: { navigate?: boolean } = {},
+  ) => {
     workspaceStore.setCurrentWorkspace(workspaceId)
-    await router.push('/')
+
+    if (options.navigate ?? true) {
+      await router.push('/')
+    }
   }
 
-  const handleCreateWorkspace = async (payload: CreateWorkspacePayload) => {
+  const handleCreateWorkspace = async (
+    payload: CreateWorkspacePayload,
+    options: { redirect?: boolean } = {},
+  ) => {
     resetState()
     loading.value = true
 
@@ -73,13 +86,97 @@ export const useWorkspaceMock = () => {
         if (result.fieldErrors) {
           fieldErrors.value = result.fieldErrors
         }
-        return false
+        return null
       }
 
       workspaceStore.setWorkspaces([result.data, ...workspaceStore.workspaces])
+      workspaceStore.setCurrentWorkspace(result.data.id)
       showSuccess('Успешно', 'Workspace успешно создан')
-      await router.push('/workspace/select')
+
+      if (options.redirect ?? true) {
+        await router.push('/workspace/select')
+      }
+
+      return result.data
+    } finally {
+      loading.value = false
+    }
+  }
+
+  const handleUpdateWorkspace = async (payload: UpdateWorkspacePayload) => {
+    resetState()
+    loading.value = true
+
+    try {
+      const result = await updateWorkspace(payload)
+
+      if (!result.ok) {
+        error.value = result.message
+        if (result.fieldErrors) {
+          fieldErrors.value = result.fieldErrors
+        }
+        return null
+      }
+
+      workspaceStore.setWorkspaces(
+        workspaceStore.workspaces.map((ws) => (ws.id === result.data.id ? result.data : ws)),
+      )
+      showSuccess('Успешно', 'Workspace обновлён')
+
+      return result.data
+    } finally {
+      loading.value = false
+    }
+  }
+
+  const handleDeleteWorkspace = async (workspaceId: string) => {
+    resetState()
+    loading.value = true
+
+    try {
+      const result = await deleteWorkspace(workspaceId)
+
+      if (!result.ok) {
+        error.value = result.message
+        showError(result.message)
+        return false
+      }
+
+      const remaining = workspaceStore.workspaces.filter((ws) => ws.id !== workspaceId)
+      workspaceStore.setWorkspaces(remaining)
+
+      if (workspaceStore.currentWorkspaceId === workspaceId) {
+        if (remaining[0]) {
+          workspaceStore.setCurrentWorkspace(remaining[0].id)
+        } else {
+          workspaceStore.clearCurrentWorkspace()
+        }
+      }
+
+      showSuccess('Успешно', 'Workspace удалён')
       return true
+    } finally {
+      loading.value = false
+    }
+  }
+
+  const handleDuplicateWorkspace = async (workspaceId: string) => {
+    resetState()
+    loading.value = true
+
+    try {
+      const result = await duplicateWorkspace(workspaceId)
+
+      if (!result.ok) {
+        error.value = result.message
+        showError(result.message)
+        return null
+      }
+
+      workspaceStore.setWorkspaces([result.data, ...workspaceStore.workspaces])
+      showSuccess('Успешно', 'Workspace продублирован')
+
+      return result.data
     } finally {
       loading.value = false
     }
@@ -239,6 +336,9 @@ export const useWorkspaceMock = () => {
     handleFetchWorkspaces,
     handleSelectWorkspace,
     handleCreateWorkspace,
+    handleUpdateWorkspace,
+    handleDeleteWorkspace,
+    handleDuplicateWorkspace,
     handleFetchMembers,
     handleInviteMember,
     handleFetchInvite,

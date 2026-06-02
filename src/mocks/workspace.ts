@@ -41,6 +41,10 @@ export interface CreateWorkspacePayload {
   description?: string
 }
 
+export interface UpdateWorkspacePayload extends CreateWorkspacePayload {
+  id: string
+}
+
 export interface InviteMemberPayload {
   workspaceId: string
   email: string
@@ -140,11 +144,10 @@ export const fetchWorkspaces = async (forceLoading = false): Promise<MockResult<
   return { ok: true, data: [...MOCK_WORKSPACES] }
 }
 
-export const createWorkspace = async (
+const validateWorkspacePayload = (
   payload: CreateWorkspacePayload,
-): Promise<MockResult<Workspace>> => {
-  await delay()
-
+  excludeWorkspaceId?: string,
+): { fieldErrors?: Record<string, string>; message?: string } | null => {
   const fieldErrors: Record<string, string> = {}
 
   if (!payload.name?.trim()) {
@@ -158,16 +161,35 @@ export const createWorkspace = async (
   }
 
   if (Object.keys(fieldErrors).length > 0) {
-    return { ok: false, message: 'Проверьте заполнение формы', fieldErrors }
+    return { message: 'Проверьте заполнение формы', fieldErrors }
   }
 
-  const exists = MOCK_WORKSPACES.some((ws) => ws.slug === payload.slug)
+  const exists = MOCK_WORKSPACES.some(
+    (ws) => ws.slug === payload.slug.trim() && ws.id !== excludeWorkspaceId,
+  )
 
   if (exists) {
     return {
-      ok: false,
       message: 'Workspace с таким URL уже существует',
       fieldErrors: { slug: 'URL уже занят' },
+    }
+  }
+
+  return null
+}
+
+export const createWorkspace = async (
+  payload: CreateWorkspacePayload,
+): Promise<MockResult<Workspace>> => {
+  await delay()
+
+  const validationError = validateWorkspacePayload(payload)
+
+  if (validationError) {
+    return {
+      ok: false,
+      message: validationError.message ?? 'Ошибка валидации',
+      fieldErrors: validationError.fieldErrors,
     }
   }
 
@@ -198,6 +220,95 @@ export const createWorkspace = async (
       }),
     },
   ]
+
+  return { ok: true, data: workspace }
+}
+
+export const updateWorkspace = async (
+  payload: UpdateWorkspacePayload,
+): Promise<MockResult<Workspace>> => {
+  await delay()
+
+  const validationError = validateWorkspacePayload(payload, payload.id)
+
+  if (validationError) {
+    return {
+      ok: false,
+      message: validationError.message ?? 'Ошибка валидации',
+      fieldErrors: validationError.fieldErrors,
+    }
+  }
+
+  const index = MOCK_WORKSPACES.findIndex((ws) => ws.id === payload.id)
+
+  if (index === -1) {
+    return { ok: false, message: 'Workspace не найден' }
+  }
+
+  const current = MOCK_WORKSPACES[index]!
+
+  const workspace: Workspace = {
+    ...current,
+    name: payload.name.trim(),
+    slug: payload.slug.trim(),
+    description: payload.description?.trim(),
+  }
+
+  MOCK_WORKSPACES[index] = workspace
+
+  return { ok: true, data: { ...workspace } }
+}
+
+export const deleteWorkspace = async (
+  workspaceId: string,
+): Promise<MockResult<{ message: string }>> => {
+  await delay()
+
+  const index = MOCK_WORKSPACES.findIndex((ws) => ws.id === workspaceId)
+
+  if (index === -1) {
+    return { ok: false, message: 'Workspace не найден' }
+  }
+
+  MOCK_WORKSPACES.splice(index, 1)
+  delete MOCK_MEMBERS[workspaceId]
+
+  return { ok: true, data: { message: 'Workspace удалён' } }
+}
+
+export const duplicateWorkspace = async (workspaceId: string): Promise<MockResult<Workspace>> => {
+  await delay()
+
+  const source = MOCK_WORKSPACES.find((ws) => ws.id === workspaceId)
+
+  if (!source) {
+    return { ok: false, message: 'Workspace не найден' }
+  }
+
+  let copySlug = `${source.slug}-copy`
+  let counter = 2
+
+  while (MOCK_WORKSPACES.some((ws) => ws.slug === copySlug)) {
+    copySlug = `${source.slug}-copy-${counter}`
+    counter += 1
+  }
+
+  const workspace: Workspace = {
+    id: `ws-${Date.now()}`,
+    name: `${source.name} (копия)`,
+    slug: copySlug,
+    description: source.description,
+    icon: source.icon,
+    role: 'Owner',
+    membersCount: source.membersCount,
+    lastActivityLabel: 'Только что',
+  }
+
+  MOCK_WORKSPACES.unshift(workspace)
+  MOCK_MEMBERS[workspace.id] = (MOCK_MEMBERS[workspaceId] ?? []).map((member) => ({
+    ...member,
+    id: `m-${Date.now()}-${member.id}`,
+  }))
 
   return { ok: true, data: workspace }
 }
