@@ -1,7 +1,15 @@
 import { ref } from 'vue'
 import { useRouter } from 'vue-router'
 
-import { login, register, requestPasswordReset, type RegisterPayload } from '@/mocks/auth'
+import {
+  login,
+  register,
+  requestPasswordReset,
+  resetPassword,
+  validateResetToken,
+  type RegisterPayload,
+  type ResetPasswordPayload,
+} from '@/mocks/auth'
 
 export const useAuthMock = () => {
   const router = useRouter()
@@ -79,6 +87,47 @@ export const useAuthMock = () => {
     }
   }
 
+  const handleValidateResetToken = async (token: string) => {
+    resetState()
+    loading.value = true
+
+    try {
+      const result = await validateResetToken(token)
+
+      if (!result.ok) {
+        error.value = result.message
+        return false
+      }
+
+      return true
+    } finally {
+      loading.value = false
+    }
+  }
+
+  const handleResetPassword = async (payload: ResetPasswordPayload) => {
+    resetState()
+    loading.value = true
+
+    try {
+      const result = await resetPassword(payload)
+
+      if (!result.ok) {
+        if (result.fieldErrors) {
+          fieldErrors.value = result.fieldErrors
+        }
+        if (result.message) {
+          error.value = result.message
+        }
+        return
+      }
+
+      successMessage.value = result.message
+    } finally {
+      loading.value = false
+    }
+  }
+
   return {
     loading,
     error,
@@ -87,6 +136,8 @@ export const useAuthMock = () => {
     handleLogin,
     handleRegister,
     handleForgotPassword,
+    handleValidateResetToken,
+    handleResetPassword,
     clearError,
   }
 }
