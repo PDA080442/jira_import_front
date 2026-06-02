@@ -2,17 +2,21 @@
   <div class="login-form">
     <AuthLogo variant="card" />
 
-    <v-alert
-      v-if="error"
-      type="error"
-      variant="tonal"
-      density="comfortable"
-      class="mb-4"
-      closable
-      @click:close="clearError"
-    >
-      {{ error }}
-    </v-alert>
+    <div v-if="error" class="login-form__error-banner mb-4">
+      <div class="login-form__error-content">
+        <v-icon icon="mdi-alert-circle" color="white" size="20" class="mr-2" />
+        <span>{{ error }}</span>
+      </div>
+      <v-btn
+        variant="text"
+        class="text-none login-form__retry-btn"
+        :disabled="loading"
+        @click="handleRetry"
+      >
+        <v-icon icon="mdi-refresh" size="18" class="mr-1" />
+        Повторить
+      </v-btn>
+    </div>
 
     <v-form @submit.prevent="handleSubmit">
       <AuthTextField
@@ -95,7 +99,7 @@ const email = ref('demo@example.com')
 const password = ref('demo1234')
 const showPassword = ref(false)
 
-const { loading, error, handleLogin, clearError } = useAuthMock()
+const { loading, error, handleLogin } = useAuthMock()
 
 const handleSubmit = async () => {
   await handleLogin({
@@ -103,9 +107,36 @@ const handleSubmit = async () => {
     password: password.value,
   })
 }
+
+const handleRetry = async () => {
+  await handleSubmit()
+}
 </script>
 
 <style scoped>
+.login-form__error-banner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 12px 16px;
+  border-radius: 12px;
+  background: #b91c1c;
+  color: #ffffff;
+}
+
+.login-form__error-content {
+  display: flex;
+  align-items: center;
+  font-size: 0.875rem;
+  font-weight: 500;
+}
+
+.login-form__retry-btn {
+  color: #ffffff !important;
+  flex-shrink: 0;
+}
+
 .login-form__links {
   display: flex;
   flex-direction: column;

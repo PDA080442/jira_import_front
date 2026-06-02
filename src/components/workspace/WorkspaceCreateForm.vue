@@ -1,0 +1,164 @@
+<template>
+  <v-form class="workspace-create-form" @submit.prevent="handleSubmit">
+    <div class="workspace-create-form__field">
+      <label class="workspace-create-form__label">
+        Название workspace <span class="workspace-create-form__required">*</span>
+      </label>
+      <v-text-field
+        v-model="name"
+        placeholder="Введите название workspace"
+        variant="outlined"
+        hide-details="auto"
+        :error-messages="fieldErrors.name"
+        :disabled="loading"
+        @update:model-value="handleNameChange"
+      />
+      <div class="workspace-create-form__hint">
+        <v-icon icon="mdi-information-outline" size="14" color="grey" />
+        Это название будет отображаться для вашей команды и участников.
+      </div>
+    </div>
+
+    <div class="workspace-create-form__field">
+      <label class="workspace-create-form__label">
+        URL slug <span class="workspace-create-form__required">*</span>
+      </label>
+      <div class="workspace-create-form__slug">
+        <span class="workspace-create-form__slug-prefix">forest-trust.io/workspace/</span>
+        <v-text-field
+          v-model="slug"
+          placeholder="workspace-name"
+          variant="outlined"
+          hide-details="auto"
+          :error-messages="fieldErrors.slug"
+          :disabled="loading"
+          class="workspace-create-form__slug-input"
+        />
+      </div>
+      <div class="workspace-create-form__hint">
+        <v-icon icon="mdi-information-outline" size="14" color="grey" />
+        Уникальный URL для вашего workspace. Используйте только латинские буквы, цифры и дефисы.
+      </div>
+    </div>
+
+    <div class="workspace-create-form__field">
+      <label class="workspace-create-form__label">Описание (необязательно)</label>
+      <v-textarea
+        v-model="description"
+        placeholder="Кратко опишите цель и задачи этого workspace"
+        variant="outlined"
+        rows="4"
+        hide-details
+        :disabled="loading"
+      />
+      <div class="workspace-create-form__hint">
+        <v-icon icon="mdi-information-outline" size="14" color="grey" />
+        Описание поможет участникам понять, для чего используется этот workspace.
+      </div>
+    </div>
+
+    <div class="workspace-create-form__actions">
+      <v-btn variant="outlined" class="text-none" :disabled="loading" to="/workspace/select">
+        Отмена
+      </v-btn>
+      <v-btn type="submit" color="primary" class="text-none" :loading="loading">
+        Создать workspace
+      </v-btn>
+    </div>
+  </v-form>
+</template>
+
+<script setup lang="ts">
+import { ref } from 'vue'
+
+import { useWorkspaceMock } from '@/composables/useWorkspaceMock'
+import { slugify } from '@/mocks/workspace'
+
+const { loading, fieldErrors, handleCreateWorkspace } = useWorkspaceMock()
+
+const name = ref('')
+const slug = ref('')
+const description = ref('')
+const slugManuallyEdited = ref(false)
+
+const handleNameChange = (value: string) => {
+  if (!slugManuallyEdited.value) {
+    slug.value = slugify(value)
+  }
+}
+
+const handleSubmit = async () => {
+  await handleCreateWorkspace({
+    name: name.value,
+    slug: slug.value,
+    description: description.value,
+  })
+}
+</script>
+
+<style scoped>
+.workspace-create-form {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.workspace-create-form__field {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.workspace-create-form__label {
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: #1c1917;
+}
+
+.workspace-create-form__required {
+  color: #b91c1c;
+}
+
+.workspace-create-form__hint {
+  display: flex;
+  align-items: flex-start;
+  gap: 6px;
+  font-size: 0.8125rem;
+  color: #78716c;
+  line-height: 1.4;
+}
+
+.workspace-create-form__slug {
+  display: flex;
+  align-items: stretch;
+  gap: 0;
+}
+
+.workspace-create-form__slug-prefix {
+  display: flex;
+  align-items: center;
+  padding: 0 14px;
+  border: 1px solid #d6d3d1;
+  border-right: none;
+  border-radius: 12px 0 0 12px;
+  background: #f5f5f4;
+  font-size: 0.875rem;
+  color: #78716c;
+  white-space: nowrap;
+}
+
+.workspace-create-form__slug-input {
+  flex: 1;
+}
+
+.workspace-create-form__slug-input :deep(.v-field) {
+  border-radius: 0 12px 12px 0 !important;
+}
+
+.workspace-create-form__actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+  padding-top: 8px;
+}
+</style>

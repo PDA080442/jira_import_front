@@ -1,0 +1,228 @@
+<template>
+  <div class="workspace-sidebar">
+    <div class="workspace-sidebar__inner">
+      <div
+        class="workspace-sidebar__logo"
+        :class="
+          isExpanded ? 'workspace-sidebar__logo--expanded' : 'workspace-sidebar__logo--collapsed'
+        "
+      >
+        <img
+          :src="logoPrimary"
+          alt="Sowline"
+          class="workspace-sidebar__logo-image"
+          :class="
+            isExpanded
+              ? 'workspace-sidebar__logo-image--expanded'
+              : 'workspace-sidebar__logo-image--collapsed'
+          "
+        />
+      </div>
+
+      <div class="app-sidebar__collapsible">
+        <div class="workspace-sidebar__section">
+          <div class="workspace-sidebar__section-label">ИМПОРТ</div>
+          <v-list density="compact" nav bg-color="transparent">
+            <v-list-item
+              v-for="item in importItems"
+              :key="item.title"
+              :prepend-icon="item.icon"
+              :title="item.title"
+              :active="isActive(item.to)"
+              :to="item.to"
+              class="workspace-sidebar__nav-item"
+              color="primary"
+            />
+          </v-list>
+        </div>
+
+        <v-divider class="workspace-sidebar__section-divider" />
+
+        <div class="workspace-sidebar__section">
+          <div class="workspace-sidebar__section-label">WORKSPACE</div>
+          <v-list density="compact" nav bg-color="transparent">
+            <v-list-item
+              v-for="item in workspaceItems"
+              :key="item.title"
+              :prepend-icon="item.icon"
+              :title="item.title"
+              :active="isActive(item.to)"
+              :to="item.to"
+              class="workspace-sidebar__nav-item"
+              color="primary"
+            />
+          </v-list>
+        </div>
+
+        <v-divider class="workspace-sidebar__section-divider" />
+
+        <div class="workspace-sidebar__section">
+          <div class="workspace-sidebar__section-label">ДОКУМЕНТАЦИЯ</div>
+          <v-list density="compact" nav bg-color="transparent">
+            <v-list-item
+              v-for="item in docItems"
+              :key="item.title"
+              :prepend-icon="item.icon"
+              :title="item.title"
+              disabled
+              class="workspace-sidebar__nav-item"
+            />
+          </v-list>
+        </div>
+      </div>
+
+      <div class="workspace-sidebar__profile">
+        <v-avatar size="36" color="primary" class="workspace-sidebar__profile-avatar">
+          <span class="text-white text-caption font-weight-bold">AD</span>
+        </v-avatar>
+        <span class="workspace-sidebar__profile-name app-sidebar__expandable">Acme Dev Team</span>
+        <v-icon icon="mdi-chevron-down" size="18" color="grey" class="app-sidebar__expandable" />
+      </div>
+    </div>
+  </div>
+</template>
+
+<script setup lang="ts">
+import { inject, ref, type Ref } from 'vue'
+import { useRoute } from 'vue-router'
+
+import logoPrimary from '@/assets/logo/logo-primary.png'
+
+const route = useRoute()
+const isExpanded = inject<Ref<boolean>>('sidebarExpanded', ref(false))
+
+const importItems = [
+  { title: 'Создать импорт', icon: 'mdi-plus-box-outline', to: undefined },
+  { title: 'Импорты', icon: 'mdi-format-list-bulleted', to: '/' },
+  { title: 'Шаблоны', icon: 'mdi-file-document-outline', to: undefined },
+]
+
+const workspaceItems = [
+  { title: 'Мои workspace', icon: 'mdi-folder-outline', to: '/workspace/select' },
+  { title: 'Участники', icon: 'mdi-account-group-outline', to: '/workspace/members' },
+  { title: 'Настройки', icon: 'mdi-cog-outline', to: undefined },
+]
+
+const docItems = [
+  { title: 'Руководство', icon: 'mdi-book-open-page-variant-outline' },
+  { title: 'Поддержка', icon: 'mdi-help-circle-outline' },
+]
+
+const isActive = (path?: string) => {
+  if (!path) {
+    return false
+  }
+
+  if (path === '/') {
+    return route.path === '/'
+  }
+
+  return route.path.startsWith(path)
+}
+</script>
+
+<style scoped>
+.workspace-sidebar {
+  height: 100%;
+}
+
+.workspace-sidebar__inner {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  min-height: 100vh;
+  padding: 16px 8px 16px;
+}
+
+.workspace-sidebar__logo {
+  display: flex;
+  align-items: center;
+  flex-shrink: 0;
+  width: 100%;
+  overflow: visible;
+}
+
+.workspace-sidebar__logo--collapsed {
+  justify-content: center;
+  margin-bottom: 12px;
+  padding: 0;
+}
+
+.workspace-sidebar__logo--expanded {
+  justify-content: center;
+  margin-bottom: 20px;
+  padding: 0;
+}
+
+.workspace-sidebar__logo-image {
+  display: block;
+  width: 100%;
+  height: auto;
+  object-fit: contain;
+}
+
+.workspace-sidebar__logo-image--collapsed {
+  max-width: 56px;
+  max-height: 48px;
+  object-position: center center;
+}
+
+.workspace-sidebar__logo-image--expanded {
+  max-height: 96px;
+  object-position: center center;
+}
+
+.app-sidebar__collapsible {
+  margin-left: 30px;
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  overflow-x: hidden;
+}
+
+.workspace-sidebar__section {
+  margin-bottom: 16px;
+}
+
+.workspace-sidebar__section-label {
+  padding: 0 4px 8px;
+  font-size: 0.6875rem;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  color: #a8a29e;
+}
+
+.workspace-sidebar__section-divider {
+  margin-bottom: 12px;
+}
+
+.workspace-sidebar__nav-item {
+  margin-bottom: 2px;
+  border-radius: 8px;
+}
+
+.workspace-sidebar__profile {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-shrink: 0;
+  margin-top: 12px;
+  padding: 10px 8px;
+  border: 1px solid #e7e5e4;
+  border-radius: 12px;
+  background: #ffffff;
+}
+
+.workspace-sidebar__profile-avatar {
+  flex-shrink: 0;
+}
+
+.workspace-sidebar__profile-name {
+  flex: 1;
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: #1c1917;
+}
+</style>

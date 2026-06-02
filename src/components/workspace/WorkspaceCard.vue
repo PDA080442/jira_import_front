@@ -1,0 +1,151 @@
+<template>
+  <v-card
+    class="workspace-card"
+    :class="{ 'workspace-card--selected': selected }"
+    variant="outlined"
+    rounded="xl"
+    @click="emit('select')"
+  >
+    <v-card-text class="workspace-card__body">
+      <div class="workspace-card__header">
+        <div class="workspace-card__icon">
+          <v-icon :icon="iconMap[workspace.icon]" color="primary" size="22" />
+        </div>
+        <div class="workspace-card__title-row">
+          <h3 class="workspace-card__title">{{ workspace.name }}</h3>
+          <WorkspaceRoleBadge :role="workspace.role" />
+        </div>
+      </div>
+
+      <v-divider class="my-4" />
+
+      <div class="workspace-card__meta">
+        <div class="workspace-card__meta-row">
+          <v-icon icon="mdi-account-group-outline" size="18" color="grey" />
+          <span class="workspace-card__meta-label">Участники</span>
+          <span class="workspace-card__meta-value">{{ membersLabel }}</span>
+        </div>
+        <div class="workspace-card__meta-row">
+          <v-icon icon="mdi-clock-outline" size="18" color="grey" />
+          <span class="workspace-card__meta-label">Последняя активность</span>
+          <span class="workspace-card__meta-value">{{ workspace.lastActivityLabel }}</span>
+        </div>
+      </div>
+    </v-card-text>
+  </v-card>
+</template>
+
+<script setup lang="ts">
+import { computed } from 'vue'
+
+import WorkspaceRoleBadge from '@/components/workspace/WorkspaceRoleBadge.vue'
+import type { Workspace, WorkspaceIcon } from '@/mocks/workspace'
+
+const props = defineProps<{
+  workspace: Workspace
+  selected?: boolean
+}>()
+
+const emit = defineEmits<{
+  select: []
+}>()
+
+const iconMap: Record<WorkspaceIcon, string> = {
+  tree: 'mdi-pine-tree',
+  leaf: 'mdi-leaf',
+  mountain: 'mdi-image-filter-hdr',
+}
+
+const membersLabel = computed(() => {
+  const count = props.workspace.membersCount
+  const mod10 = count % 10
+  const mod100 = count % 100
+
+  if (mod10 === 1 && mod100 !== 11) {
+    return `${count} участник`
+  }
+
+  if (mod10 >= 2 && mod10 <= 4 && (mod100 < 10 || mod100 >= 20)) {
+    return `${count} участника`
+  }
+
+  return `${count} участников`
+})
+</script>
+
+<style scoped>
+.workspace-card {
+  cursor: pointer;
+  border-color: #e7e5e4 !important;
+  transition:
+    border-color 0.2s ease,
+    box-shadow 0.2s ease;
+}
+
+.workspace-card:hover {
+  box-shadow: 0 4px 16px rgba(28, 25, 23, 0.06);
+}
+
+.workspace-card--selected {
+  border: 2px solid #16a34a !important;
+}
+
+.workspace-card__body {
+  padding: 20px !important;
+}
+
+.workspace-card__header {
+  display: flex;
+  gap: 14px;
+}
+
+.workspace-card__icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 44px;
+  height: 44px;
+  border-radius: 12px;
+  background: #dcfce7;
+  flex-shrink: 0;
+}
+
+.workspace-card__title-row {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  min-width: 0;
+}
+
+.workspace-card__title {
+  font-size: 1.0625rem;
+  font-weight: 700;
+  color: #1c1917;
+  line-height: 1.3;
+}
+
+.workspace-card__meta {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.workspace-card__meta-row {
+  display: grid;
+  grid-template-columns: 18px 1fr auto;
+  align-items: center;
+  gap: 8px;
+}
+
+.workspace-card__meta-label {
+  font-size: 0.8125rem;
+  color: #78716c;
+}
+
+.workspace-card__meta-value {
+  font-size: 0.8125rem;
+  font-weight: 500;
+  color: #1c1917;
+  white-space: nowrap;
+}
+</style>
