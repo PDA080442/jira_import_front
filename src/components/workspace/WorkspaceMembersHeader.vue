@@ -89,4 +89,38 @@ const handleWorkspaceChange = (id: string) => {
   font-size: 0.75rem;
   color: #78716c;
 }
+
+@media (max-width: 480px) {
+  .workspace-members-header {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 12px;
+    margin-bottom: 16px;
+  }
+
+  .workspace-members-header__selector,
+  .workspace-members-header__workspace-btn {
+    width: 100%;
+  }
+
+  .workspace-members-header__profile {
+    justify-content: space-between;
+    padding: 10px 12px;
+    border: 1px solid #e7e5e4;
+    border-radius: 12px;
+    background: #fafaf9;
+  }
+
+  .workspace-members-header__profile-info {
+    flex: 1;
+    min-width: 0;
+  }
+
+  .workspace-members-header__profile-name,
+  .workspace-members-header__profile-role {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+}
 </style>

@@ -2,18 +2,21 @@
   <v-dialog
     :model-value="modelValue"
     max-width="720"
+    scrollable
+    class="workspace-dialog"
     @update:model-value="emit('update:modelValue', $event)"
   >
     <v-card rounded="xl" class="workspace-create-dialog">
       <v-btn
         icon="mdi-close"
+        aria-label="Закрыть"
         variant="text"
         size="small"
         class="workspace-create-dialog__close"
         @click="handleClose"
       />
 
-      <v-card-text class="pa-8">
+      <v-card-text class="workspace-create-dialog__body pa-8">
         <h2 class="workspace-create-dialog__title">Создание workspace</h2>
 
         <WorkspaceCreateForm
@@ -79,5 +82,16 @@ watch(
   font-size: 1.5rem;
   font-weight: 700;
   color: #1c1917;
+}
+
+@media (max-width: 480px) {
+  .workspace-create-dialog__body {
+    padding: 48px 16px 20px !important;
+  }
+
+  .workspace-create-dialog__title {
+    font-size: 1.25rem;
+    padding-right: 32px;
+  }
 }
 </style>

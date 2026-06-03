@@ -22,7 +22,9 @@
 
       <WorkspaceSearchField v-model="searchQuery" class="workspace-select-page__search" />
 
-      <WorkspaceSkeletonGrid v-if="loading" />
+      <div v-if="loading" aria-busy="true" aria-label="Загрузка списка workspace">
+        <WorkspaceSkeletonGrid />
+      </div>
 
       <PageErrorState
         v-else-if="error"
@@ -259,13 +261,13 @@ onMounted(() => {
 
 .workspace-select-page__grid {
   display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
+  grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 20px;
 }
 
-@media (max-width: 600px) {
+@media (min-width: 1100px) {
   .workspace-select-page__grid {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
+    grid-template-columns: repeat(3, minmax(0, 1fr));
   }
 }
 

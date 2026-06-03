@@ -44,9 +44,9 @@ withDefaults(
   border-color: #e7e5e4 !important;
 }
 
-@media (max-width: 600px) {
+@media (min-width: 1100px) {
   .workspace-skeleton-grid {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
+    grid-template-columns: repeat(3, minmax(0, 1fr));
   }
 }
 

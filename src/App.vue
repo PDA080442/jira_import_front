@@ -15,7 +15,14 @@ const { snackbarState, hideSnackbar } = useAppNotify()
 
     <AppToast />
 
-    <v-snackbar v-model="snackbarState.show" color="error" location="bottom" :timeout="6000">
+    <v-snackbar
+      v-model="snackbarState.show"
+      color="error"
+      location="bottom"
+      :timeout="6000"
+      role="alert"
+      aria-live="assertive"
+    >
       <div class="d-flex align-center">
         <v-icon icon="mdi-alert-circle" color="white" class="mr-2" />
         {{ snackbarState.message }}

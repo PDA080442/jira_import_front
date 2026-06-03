@@ -1,10 +1,19 @@
 <template>
   <aside
     class="app-sidebar-shell"
-    :class="{ 'app-sidebar-shell--expanded': isExpanded }"
+    :class="{
+      'app-sidebar-shell--expanded': isExpandedVisual,
+      'app-sidebar-shell--mobile': mobileMode,
+      'app-sidebar-shell--mobile-open': mobileMode && mobileOpen,
+    }"
     :style="shellStyle"
-    @mouseenter="isExpanded = true"
-    @mouseleave="isExpanded = false"
+    aria-label="Навигация приложения"
+    :aria-expanded="isExpandedVisual"
+    :aria-hidden="mobileMode && !mobileOpen ? true : undefined"
+    @mouseenter="handleMouseEnter"
+    @mouseleave="handleMouseLeave"
+    @focusin="handleFocusIn"
+    @focusout="handleFocusOut"
   >
     <div class="app-sidebar-shell__inner">
       <slot />
@@ -13,27 +22,95 @@
 </template>
 
 <script setup lang="ts">
-import { computed, provide, ref } from 'vue'
+import { computed, inject, provide, ref } from 'vue'
 
 const props = withDefaults(
   defineProps<{
     expandedWidth?: number
     collapsedWidth?: number
+    mobileMode?: boolean
+    mobileOpen?: boolean
   }>(),
   {
     expandedWidth: 228,
     collapsedWidth: 72,
+    mobileMode: false,
+    mobileOpen: false,
   },
 )
 
+const emit = defineEmits<{
+  navigate: []
+}>()
+
 const isExpanded = ref(false)
+const closeMobileNav = inject<(() => void) | undefined>('closeMobileNav', undefined)
 
-provide('sidebarExpanded', isExpanded)
+const isExpandedVisual = computed(
+  () => props.mobileMode || isExpanded.value || (props.mobileMode && props.mobileOpen),
+)
 
-const shellStyle = computed(() => ({
-  '--sidebar-collapsed-width': `${props.collapsedWidth}px`,
-  '--sidebar-expanded-width': `${props.expandedWidth}px`,
-}))
+provide('sidebarExpanded', isExpandedVisual)
+
+const shellStyle = computed(() => {
+  if (props.mobileMode) {
+    return {
+      '--sidebar-collapsed-width': '100%',
+      '--sidebar-expanded-width': '100%',
+    }
+  }
+
+  return {
+    '--sidebar-collapsed-width': `${props.collapsedWidth}px`,
+    '--sidebar-expanded-width': `${props.expandedWidth}px`,
+  }
+})
+
+const handleMouseEnter = () => {
+  if (!props.mobileMode) {
+    isExpanded.value = true
+  }
+}
+
+const handleMouseLeave = () => {
+  if (!props.mobileMode && !isSidebarFocused()) {
+    isExpanded.value = false
+  }
+}
+
+const handleFocusIn = () => {
+  if (!props.mobileMode) {
+    isExpanded.value = true
+  }
+}
+
+const handleFocusOut = (event: FocusEvent) => {
+  if (props.mobileMode) {
+    return
+  }
+
+  const currentTarget = event.currentTarget as HTMLElement | null
+  const relatedTarget = event.relatedTarget as Node | null
+
+  if (currentTarget && relatedTarget && currentTarget.contains(relatedTarget)) {
+    return
+  }
+
+  isExpanded.value = false
+}
+
+const isSidebarFocused = () => {
+  const active = document.activeElement
+  return active instanceof HTMLElement && active.closest('.app-sidebar-shell') !== null
+}
+
+// Expose for sidebar nav clicks — parent listens via @navigate on shell
+defineExpose({
+  notifyNavigate: () => {
+    closeMobileNav?.()
+    emit('navigate')
+  },
+})
 </script>
 
 <style scoped>
@@ -51,6 +128,16 @@ const shellStyle = computed(() => ({
   width: var(--sidebar-expanded-width);
 }
 
+.app-sidebar-shell--mobile {
+  width: 100% !important;
+  min-height: 100dvh;
+  border-right: none;
+}
+
+.app-sidebar-shell--mobile .app-sidebar-shell__inner {
+  width: 100% !important;
+}
+
 .app-sidebar-shell__inner {
   width: var(--sidebar-collapsed-width);
   min-height: 100%;
@@ -59,6 +146,38 @@ const shellStyle = computed(() => ({
 
 .app-sidebar-shell--expanded .app-sidebar-shell__inner {
   width: var(--sidebar-expanded-width);
+}
+
+.app-sidebar-shell--mobile.app-sidebar-shell--expanded :deep(.workspace-sidebar__inner),
+.app-sidebar-shell--mobile :deep(.workspace-sidebar__inner) {
+  align-items: stretch;
+  padding: 16px 12px;
+}
+
+.app-sidebar-shell--mobile :deep(.app-sidebar__collapsible) {
+  margin-left: 0 !important;
+  width: 100%;
+}
+
+.app-sidebar-shell--mobile :deep(.workspace-sidebar__section-label),
+.app-sidebar-shell--mobile :deep(.app-sidebar__expandable),
+.app-sidebar-shell--mobile :deep(.v-list-item-title),
+.app-sidebar-shell--mobile :deep(.v-list-item__content) {
+  display: revert !important;
+}
+
+.app-sidebar-shell--mobile :deep(.v-list-item) {
+  display: flex !important;
+  justify-content: flex-start !important;
+  padding-inline: 12px !important;
+  grid-template-columns: unset !important;
+}
+
+.app-sidebar-shell--mobile :deep(.workspace-sidebar__profile) {
+  justify-content: flex-start;
+  padding: 10px 12px;
+  border: 1px solid #e7e5e4;
+  background: #ffffff;
 }
 
 .app-sidebar-shell--expanded :deep(.workspace-sidebar__inner) {
@@ -92,13 +211,15 @@ const shellStyle = computed(() => ({
   opacity: 0;
 }
 
-/* Collapsed layout */
-.app-sidebar-shell:not(.app-sidebar-shell--expanded) :deep(.workspace-sidebar__inner) {
+/* Collapsed layout (desktop only) */
+.app-sidebar-shell:not(.app-sidebar-shell--expanded):not(.app-sidebar-shell--mobile)
+  :deep(.workspace-sidebar__inner) {
   align-items: center;
   padding: 16px 8px 12px;
 }
 
-.app-sidebar-shell:not(.app-sidebar-shell--expanded) :deep(.app-sidebar__collapsible) {
+.app-sidebar-shell:not(.app-sidebar-shell--expanded):not(.app-sidebar-shell--mobile)
+  :deep(.app-sidebar__collapsible) {
   width: 100%;
   flex: 1;
   min-height: 0;
@@ -106,23 +227,30 @@ const shellStyle = computed(() => ({
   overflow-x: visible;
 }
 
-.app-sidebar-shell:not(.app-sidebar-shell--expanded) :deep(.workspace-sidebar__section-label),
-.app-sidebar-shell:not(.app-sidebar-shell--expanded) :deep(.app-sidebar__expandable),
-.app-sidebar-shell:not(.app-sidebar-shell--expanded) :deep(.v-list-item-title),
-.app-sidebar-shell:not(.app-sidebar-shell--expanded) :deep(.v-list-item__content) {
+.app-sidebar-shell:not(.app-sidebar-shell--expanded):not(.app-sidebar-shell--mobile)
+  :deep(.workspace-sidebar__section-label),
+.app-sidebar-shell:not(.app-sidebar-shell--expanded):not(.app-sidebar-shell--mobile)
+  :deep(.app-sidebar__expandable),
+.app-sidebar-shell:not(.app-sidebar-shell--expanded):not(.app-sidebar-shell--mobile)
+  :deep(.v-list-item-title),
+.app-sidebar-shell:not(.app-sidebar-shell--expanded):not(.app-sidebar-shell--mobile)
+  :deep(.v-list-item__content) {
   display: none !important;
 }
 
-.app-sidebar-shell:not(.app-sidebar-shell--expanded) :deep(.workspace-sidebar__section) {
+.app-sidebar-shell:not(.app-sidebar-shell--expanded):not(.app-sidebar-shell--mobile)
+  :deep(.workspace-sidebar__section) {
   margin-bottom: 2px;
   width: 100%;
 }
 
-.app-sidebar-shell:not(.app-sidebar-shell--expanded) :deep(.workspace-sidebar__section-divider) {
+.app-sidebar-shell:not(.app-sidebar-shell--expanded):not(.app-sidebar-shell--mobile)
+  :deep(.workspace-sidebar__section-divider) {
   margin: 4px 0;
 }
 
-.app-sidebar-shell:not(.app-sidebar-shell--expanded) :deep(.v-list-item) {
+.app-sidebar-shell:not(.app-sidebar-shell--expanded):not(.app-sidebar-shell--mobile)
+  :deep(.v-list-item) {
   display: flex !important;
   justify-content: center;
   align-items: center;
@@ -132,7 +260,8 @@ const shellStyle = computed(() => ({
   grid-template-columns: unset !important;
 }
 
-.app-sidebar-shell:not(.app-sidebar-shell--expanded) :deep(.v-list-item__prepend) {
+.app-sidebar-shell:not(.app-sidebar-shell--expanded):not(.app-sidebar-shell--mobile)
+  :deep(.v-list-item__prepend) {
   display: flex !important;
   justify-content: center;
   align-items: center;
@@ -140,16 +269,19 @@ const shellStyle = computed(() => ({
   margin-inline: 0 !important;
 }
 
-.app-sidebar-shell:not(.app-sidebar-shell--expanded) :deep(.v-list-item__prepend .v-icon) {
+.app-sidebar-shell:not(.app-sidebar-shell--expanded):not(.app-sidebar-shell--mobile)
+  :deep(.v-list-item__prepend .v-icon) {
   font-size: 22px;
   opacity: 1;
 }
 
-.app-sidebar-shell:not(.app-sidebar-shell--expanded) :deep(.v-list-item__append) {
+.app-sidebar-shell:not(.app-sidebar-shell--expanded):not(.app-sidebar-shell--mobile)
+  :deep(.v-list-item__append) {
   display: none;
 }
 
-.app-sidebar-shell:not(.app-sidebar-shell--expanded) :deep(.workspace-sidebar__profile) {
+.app-sidebar-shell:not(.app-sidebar-shell--expanded):not(.app-sidebar-shell--mobile)
+  :deep(.workspace-sidebar__profile) {
   justify-content: center;
   width: 100%;
   margin-top: 8px;
@@ -158,7 +290,8 @@ const shellStyle = computed(() => ({
   background: transparent;
 }
 
-.app-sidebar-shell:not(.app-sidebar-shell--expanded) :deep(.workspace-sidebar__profile-avatar) {
+.app-sidebar-shell:not(.app-sidebar-shell--expanded):not(.app-sidebar-shell--mobile)
+  :deep(.workspace-sidebar__profile-avatar) {
   width: 36px !important;
   height: 36px !important;
 }

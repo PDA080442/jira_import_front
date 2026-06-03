@@ -1,5 +1,6 @@
 <template>
   <div class="auth-layout" :class="{ 'auth-layout--no-scroll': noScroll }">
+    <SkipToContentLink />
     <AuthLogo v-if="showHeaderLogo" variant="header" />
 
     <div
@@ -8,9 +9,14 @@
       :style="{ backgroundImage: `url(${forestBackground})` }"
     />
 
-    <div class="auth-layout__content">
+    <main
+      id="main-content"
+      class="auth-layout__content"
+      tabindex="-1"
+      aria-label="Форма авторизации"
+    >
       <slot />
-    </div>
+    </main>
   </div>
 </template>
 
@@ -18,6 +24,7 @@
 import { onMounted, onUnmounted } from 'vue'
 
 import forestBackground from '@/assets/auth/forest-background.png'
+import SkipToContentLink from '@/components/common/SkipToContentLink.vue'
 import AuthLogo from '@/components/auth/AuthLogo.vue'
 
 const props = defineProps<{
@@ -101,5 +108,11 @@ onUnmounted(() => {
   justify-content: center;
   width: 100%;
   padding: 32px 16px;
+}
+
+@media (max-width: 480px) {
+  .auth-layout__content {
+    padding: 20px 12px;
+  }
 }
 </style>

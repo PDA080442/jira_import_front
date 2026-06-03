@@ -4,18 +4,21 @@
     :target="target"
     location="bottom start"
     :close-on-content-click="true"
+    aria-label="Действия с workspace"
     @update:model-value="emit('update:modelValue', $event)"
   >
-    <v-list density="compact" min-width="220" class="workspace-context-menu py-2">
+    <v-list density="compact" min-width="220" class="workspace-context-menu py-2" role="menu">
       <v-list-item
         prepend-icon="mdi-pencil-outline"
         title="Редактировать"
+        role="menuitem"
         class="workspace-context-menu__item"
         @click="emit('edit')"
       />
       <v-list-item
         prepend-icon="mdi-content-copy"
         title="Дублировать"
+        role="menuitem"
         class="workspace-context-menu__item"
         @click="emit('duplicate')"
       />
@@ -23,6 +26,7 @@
       <v-list-item
         prepend-icon="mdi-delete-outline"
         title="Удалить"
+        role="menuitem"
         base-color="error"
         class="workspace-context-menu__item workspace-context-menu__item--danger"
         @click="emit('delete')"

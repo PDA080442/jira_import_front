@@ -2,11 +2,14 @@
   <v-dialog
     :model-value="modelValue"
     max-width="720"
+    scrollable
+    class="workspace-dialog"
     @update:model-value="emit('update:modelValue', $event)"
   >
     <v-card rounded="xl" class="workspace-edit-dialog">
       <v-btn
         icon="mdi-close"
+        aria-label="Закрыть"
         variant="text"
         size="small"
         class="workspace-edit-dialog__close"

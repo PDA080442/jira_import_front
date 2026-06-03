@@ -3,7 +3,12 @@
     <div class="workspace-dashboard">
       <header class="workspace-dashboard__topbar">
         <h1 class="workspace-dashboard__page-title">Дашборд</h1>
-        <button type="button" class="workspace-dashboard__user">
+        <button
+          type="button"
+          class="workspace-dashboard__user"
+          aria-label="Меню пользователя Alex Developer"
+          aria-haspopup="true"
+        >
           <v-avatar size="32" color="primary" class="workspace-dashboard__user-avatar">
             <span class="text-caption text-white font-weight-bold">AD</span>
           </v-avatar>
@@ -39,7 +44,9 @@
         </div>
       </section>
 
-      <DashboardSkeleton v-if="loading" />
+      <div v-if="loading" aria-busy="true" aria-label="Загрузка дашборда">
+        <DashboardSkeleton />
+      </div>
 
       <PageErrorState
         v-else-if="error"
@@ -85,10 +92,17 @@
         >
           <div class="workspace-dashboard__card-header">
             <h3 class="workspace-dashboard__card-title">Последние импорты</h3>
-            <a href="#" class="workspace-dashboard__card-link" @click.prevent>Смотреть все</a>
+            <v-btn
+              variant="text"
+              color="primary"
+              class="text-none workspace-dashboard__card-link px-0"
+              @click.prevent
+            >
+              Смотреть все
+            </v-btn>
           </div>
 
-          <div class="workspace-dashboard__table">
+          <div class="workspace-dashboard__table" role="region" aria-label="Последние импорты">
             <div class="workspace-dashboard__table-head">
               <span>Name</span>
               <span>Status</span>
@@ -100,6 +114,7 @@
               :key="item.name"
               type="button"
               class="workspace-dashboard__table-row"
+              :aria-label="`Импорт ${item.name}, статус ${item.status}, ${item.date}`"
             >
               <span class="workspace-dashboard__table-name">{{ item.name }}</span>
               <span class="workspace-dashboard__table-status">
@@ -126,10 +141,17 @@
           >
             <div class="workspace-dashboard__card-header">
               <h3 class="workspace-dashboard__card-title">Импорты по неделям</h3>
-              <a href="#" class="workspace-dashboard__card-link" @click.prevent>Смотреть все</a>
+              <v-btn
+                variant="text"
+                color="primary"
+                class="text-none workspace-dashboard__card-link px-0"
+                @click.prevent
+              >
+                Смотреть все
+              </v-btn>
             </div>
 
-            <div class="workspace-dashboard__chart">
+            <div class="workspace-dashboard__chart" role="img" :aria-label="chartAriaLabel">
               <div class="workspace-dashboard__chart-y-axis">
                 <span v-for="tick in chartYTicks" :key="tick">{{ tick }}</span>
               </div>
@@ -166,6 +188,7 @@
                 :key="error.file"
                 type="button"
                 class="workspace-dashboard__error-item"
+                :aria-label="`Ошибка в файле ${error.file}: ${error.message}`"
               >
                 <v-icon
                   icon="mdi-alert-circle"
@@ -229,6 +252,16 @@ const chartYTicks = computed(() => {
 const isDashboardEmpty = computed(
   () => dashboardData.value !== null && dashboardData.value.recentImports.length === 0,
 )
+
+const chartAriaLabel = computed(() => {
+  const bars = weeklyChart.value
+  if (bars.length === 0) {
+    return 'График импортов по неделям, данных нет'
+  }
+
+  const summary = bars.map((bar) => `${bar.label}: ${bar.value}`).join(', ')
+  return `График импортов по неделям. ${summary}`
+})
 
 onMounted(() => {
   handleFetchDashboard()
@@ -478,6 +511,9 @@ watch(
   font-size: 0.875rem;
   font-weight: 500;
   color: #1c1917;
+  min-width: 0;
+  overflow-wrap: anywhere;
+  word-break: break-word;
 }
 
 .workspace-dashboard__table-date {
@@ -617,18 +653,23 @@ watch(
   flex-direction: column;
   gap: 4px;
   min-width: 0;
+  flex: 1;
 }
 
 .workspace-dashboard__error-file {
   font-size: 0.875rem;
   font-weight: 600;
   color: #1c1917;
+  overflow-wrap: anywhere;
+  word-break: break-word;
 }
 
 .workspace-dashboard__error-message {
   font-size: 0.8125rem;
   color: #78716c;
   line-height: 1.4;
+  overflow-wrap: anywhere;
+  word-break: break-word;
 }
 
 .workspace-dashboard__error-meta {
@@ -636,6 +677,7 @@ watch(
   align-items: center;
   gap: 4px;
   flex-shrink: 0;
+  min-width: 0;
 }
 
 .workspace-dashboard__error-date {
@@ -684,6 +726,134 @@ watch(
   .workspace-dashboard__table-date,
   .workspace-dashboard__table-chevron {
     display: none;
+  }
+}
+
+@media (max-width: 480px) {
+  .workspace-dashboard {
+    margin: 0;
+    padding: 0;
+  }
+
+  .workspace-dashboard__topbar {
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-bottom: 16px;
+  }
+
+  .workspace-dashboard__user-name {
+    display: none;
+  }
+
+  .workspace-dashboard__welcome-title {
+    font-size: 1.375rem;
+  }
+
+  .workspace-dashboard__welcome-subtitle {
+    font-size: 0.8125rem;
+  }
+
+  .workspace-dashboard__stats {
+    gap: 10px;
+    margin-bottom: 16px;
+  }
+
+  .workspace-dashboard__stat-card {
+    padding: 14px;
+  }
+
+  .workspace-dashboard__stat-value {
+    font-size: 1.5rem;
+  }
+
+  .workspace-dashboard__imports,
+  .workspace-dashboard__chart-card,
+  .workspace-dashboard__errors-card {
+    padding: 14px 12px 10px;
+  }
+
+  .workspace-dashboard__card-header {
+    gap: 8px;
+    align-items: flex-start;
+  }
+
+  .workspace-dashboard__card-title {
+    font-size: 0.9375rem;
+  }
+
+  .workspace-dashboard__table-head {
+    display: none;
+  }
+
+  .workspace-dashboard__table-row {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 8px;
+    padding: 14px 4px;
+    position: relative;
+  }
+
+  .workspace-dashboard__table-name {
+    width: 100%;
+    padding-right: 28px;
+  }
+
+  .workspace-dashboard__table-status {
+    width: 100%;
+  }
+
+  .workspace-dashboard__status-pill {
+    max-width: 100%;
+  }
+
+  .workspace-dashboard__table-date {
+    display: block;
+    font-size: 0.75rem;
+  }
+
+  .workspace-dashboard__table-chevron {
+    display: flex;
+    position: absolute;
+    top: 14px;
+    right: 0;
+  }
+
+  .workspace-dashboard__error-item {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 8px;
+    padding: 14px 0;
+  }
+
+  .workspace-dashboard__error-meta {
+    width: 100%;
+    justify-content: space-between;
+  }
+
+  .workspace-dashboard__error-date {
+    white-space: normal;
+    text-align: right;
+  }
+
+  .workspace-dashboard__chart {
+    height: 180px;
+    gap: 8px;
+  }
+
+  .workspace-dashboard__chart-bars {
+    gap: 4px;
+    overflow-x: auto;
+    padding-bottom: 24px;
+  }
+
+  .workspace-dashboard__chart-bar-wrap {
+    flex: 0 0 36px;
+  }
+
+  .workspace-dashboard__chart-bar-label {
+    font-size: 0.625rem;
   }
 }
 </style>

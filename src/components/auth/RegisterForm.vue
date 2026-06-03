@@ -8,7 +8,7 @@
         Зарегистрируйтесь, чтобы начать импортировать ваши задачи и управлять проектами
       </p>
 
-      <div v-if="error" class="register-form__error mt-4">
+      <div v-if="error" class="register-form__error mt-4" role="alert" aria-live="assertive">
         <v-alert
           type="error"
           variant="tonal"

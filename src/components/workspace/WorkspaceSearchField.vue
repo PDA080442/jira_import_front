@@ -1,8 +1,11 @@
 <template>
+  <label class="visually-hidden" :for="fieldId">Поиск workspace</label>
   <v-text-field
+    :id="fieldId"
     :model-value="modelValue"
     placeholder="Поиск workspace"
     prepend-inner-icon="mdi-magnify"
+    aria-label="Поиск workspace"
     variant="outlined"
     density="comfortable"
     hide-details
@@ -13,9 +16,13 @@
 </template>
 
 <script setup lang="ts">
+import { useId } from 'vue'
+
 defineProps<{
   modelValue: string
 }>()
+
+const fieldId = useId()
 
 const emit = defineEmits<{
   'update:modelValue': [value: string]

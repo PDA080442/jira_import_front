@@ -1,11 +1,11 @@
 <template>
-  <div class="app-empty-state">
+  <section class="app-empty-state" aria-labelledby="empty-state-title">
     <div class="app-empty-state__illustration">
       <slot name="icon">
         <v-icon :icon="icon" size="48" color="primary" />
       </slot>
     </div>
-    <h2 class="app-empty-state__title">{{ title }}</h2>
+    <h2 id="empty-state-title" class="app-empty-state__title">{{ title }}</h2>
     <p class="app-empty-state__description">{{ description }}</p>
     <v-btn
       v-if="actionLabel"
@@ -16,7 +16,7 @@
     >
       {{ actionLabel }}
     </v-btn>
-  </div>
+  </section>
 </template>
 
 <script setup lang="ts">

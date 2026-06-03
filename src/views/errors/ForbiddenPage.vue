@@ -1,5 +1,5 @@
 <template>
-  <div class="forbidden-page">
+  <main class="forbidden-page" id="main-content" tabindex="-1">
     <div class="forbidden-page__illustration">
       <v-icon icon="mdi-lock-outline" size="56" color="grey-lighten-1" />
       <div class="forbidden-page__badge">
@@ -22,7 +22,7 @@
     >
       Вернуться назад
     </v-btn>
-  </div>
+  </main>
 </template>
 
 <script setup lang="ts">

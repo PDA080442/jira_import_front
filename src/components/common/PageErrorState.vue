@@ -1,6 +1,6 @@
 <template>
-  <div class="page-error-state">
-    <div class="page-error-state__icon-wrap">
+  <div class="page-error-state" role="alert" aria-live="polite">
+    <div class="page-error-state__icon-wrap" aria-hidden="true">
       <v-icon icon="mdi-alert-circle-outline" size="40" color="error" />
     </div>
     <h2 class="page-error-state__title">{{ title }}</h2>

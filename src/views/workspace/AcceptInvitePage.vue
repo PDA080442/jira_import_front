@@ -3,7 +3,12 @@
     <AuthCard :max-width="480">
       <AcceptInviteSkeleton v-if="pageLoading" />
 
-      <div v-else-if="invalidToken" class="accept-invite-page accept-invite-page--error">
+      <div
+        v-else-if="invalidToken"
+        class="accept-invite-page accept-invite-page--error"
+        role="alert"
+        aria-live="polite"
+      >
         <v-icon icon="mdi-alert-circle-outline" size="48" color="error" class="mb-4" />
         <h1 class="accept-invite-page__title">Приглашение недействительно</h1>
         <p class="accept-invite-page__subtitle">

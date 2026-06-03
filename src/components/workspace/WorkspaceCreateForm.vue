@@ -238,4 +238,40 @@ defineExpose({
   gap: 12px;
   padding-top: 8px;
 }
+
+@media (max-width: 480px) {
+  .workspace-create-form {
+    gap: 18px;
+  }
+
+  .workspace-create-form__slug {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .workspace-create-form__slug-prefix {
+    width: 100%;
+    border-right: 1px solid #d6d3d1;
+    border-bottom: none;
+    border-radius: 12px 12px 0 0;
+    padding: 10px 12px;
+    font-size: 0.75rem;
+    line-height: 1.3;
+    white-space: normal;
+    overflow-wrap: anywhere;
+  }
+
+  .workspace-create-form__slug-input :deep(.v-field) {
+    border-radius: 0 0 12px 12px !important;
+  }
+
+  .workspace-create-form__actions {
+    flex-direction: column-reverse;
+    align-items: stretch;
+  }
+
+  .workspace-create-form__actions :deep(.v-btn) {
+    width: 100%;
+  }
+}
 </style>

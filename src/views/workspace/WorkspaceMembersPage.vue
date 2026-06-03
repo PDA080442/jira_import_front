@@ -15,7 +15,9 @@
         </v-btn>
       </div>
 
-      <WorkspaceMembersSkeleton v-if="loading" />
+      <div v-if="loading" aria-busy="true" aria-label="Загрузка участников">
+        <WorkspaceMembersSkeleton />
+      </div>
 
       <PageErrorState
         v-else-if="error"
@@ -132,5 +134,27 @@ onMounted(async () => {
   margin-top: 16px;
   font-size: 0.875rem;
   color: #78716c;
+}
+
+@media (max-width: 480px) {
+  .workspace-members-page__title {
+    font-size: 1.25rem;
+    line-height: 1.25;
+  }
+}
+
+@media (max-width: 600px) {
+  .workspace-members-page__header {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .workspace-members-page__header .v-btn {
+    width: 100%;
+  }
+
+  .workspace-members-page__title {
+    font-size: 1.5rem;
+  }
 }
 </style>

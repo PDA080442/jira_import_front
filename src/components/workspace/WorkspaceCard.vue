@@ -1,15 +1,21 @@
 <template>
   <v-card
+    ref="cardRef"
     class="workspace-card"
     :class="{ 'workspace-card--selected': selected }"
     variant="outlined"
     rounded="lg"
+    tabindex="0"
+    role="button"
+    :aria-pressed="selected"
+    :aria-label="cardAriaLabel"
     @click="emit('select')"
+    @keydown="handleKeydown"
     @contextmenu.prevent="emit('contextmenu', $event)"
   >
     <v-card-text class="workspace-card__body">
       <div class="workspace-card__header">
-        <div class="workspace-card__icon">
+        <div class="workspace-card__icon" aria-hidden="true">
           <v-icon :icon="iconMap[workspace.icon]" color="primary" size="22" />
         </div>
         <div class="workspace-card__title-row">
@@ -22,12 +28,22 @@
 
       <div class="workspace-card__meta">
         <div class="workspace-card__meta-row">
-          <v-icon icon="mdi-account-group-outline" size="16" class="workspace-card__meta-icon" />
+          <v-icon
+            icon="mdi-account-group-outline"
+            size="16"
+            class="workspace-card__meta-icon"
+            aria-hidden="true"
+          />
           <span class="workspace-card__meta-label">Участники</span>
           <span class="workspace-card__meta-value">{{ membersLabel }}</span>
         </div>
         <div class="workspace-card__meta-row">
-          <v-icon icon="mdi-clock-outline" size="16" class="workspace-card__meta-icon" />
+          <v-icon
+            icon="mdi-clock-outline"
+            size="16"
+            class="workspace-card__meta-icon"
+            aria-hidden="true"
+          />
           <span class="workspace-card__meta-label">Последняя активность</span>
           <span class="workspace-card__meta-value">{{ workspace.lastActivityLabel }}</span>
         </div>
@@ -37,7 +53,7 @@
 </template>
 
 <script setup lang="ts">
-import { computed } from 'vue'
+import { computed, ref } from 'vue'
 
 import WorkspaceRoleBadge from '@/components/workspace/WorkspaceRoleBadge.vue'
 import type { Workspace, WorkspaceIcon } from '@/mocks/workspace'
@@ -51,6 +67,8 @@ const emit = defineEmits<{
   select: []
   contextmenu: [event: MouseEvent]
 }>()
+
+const cardRef = ref<{ $el?: HTMLElement } | null>(null)
 
 const iconMap: Record<WorkspaceIcon, string> = {
   tree: 'mdi-pine-tree',
@@ -73,6 +91,44 @@ const membersLabel = computed(() => {
 
   return `${count} участников`
 })
+
+const cardAriaLabel = computed(
+  () =>
+    `${props.workspace.name}, роль ${props.workspace.role}, ${membersLabel.value}. ${props.selected ? 'Выбран' : 'Не выбран'}. Нажмите Enter для выбора, Shift+F10 для меню.`,
+)
+
+const getCardElement = (): HTMLElement | null => {
+  const el = cardRef.value?.$el ?? cardRef.value
+  return el instanceof HTMLElement ? el : null
+}
+
+const handleKeydown = (event: KeyboardEvent) => {
+  if (event.key === 'Enter' || event.key === ' ') {
+    event.preventDefault()
+    emit('select')
+    return
+  }
+
+  if (event.key === 'ContextMenu' || (event.shiftKey && event.key === 'F10')) {
+    event.preventDefault()
+    const element = getCardElement()
+
+    if (!element) {
+      return
+    }
+
+    const rect = element.getBoundingClientRect()
+    emit(
+      'contextmenu',
+      new MouseEvent('contextmenu', {
+        bubbles: true,
+        cancelable: true,
+        clientX: rect.left + rect.width / 2,
+        clientY: rect.top + 24,
+      }),
+    )
+  }
+}
 </script>
 
 <style scoped>

@@ -11,7 +11,7 @@
       </p>
     </div>
 
-    <div v-if="error" class="forgot-password-form__error-wrap">
+    <div v-if="error" class="forgot-password-form__error-wrap" role="alert" aria-live="assertive">
       <v-alert
         type="error"
         variant="tonal"

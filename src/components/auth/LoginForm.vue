@@ -2,7 +2,7 @@
   <div class="login-form">
     <AuthLogo variant="card" />
 
-    <div v-if="error" class="login-form__error-banner mb-4">
+    <div v-if="error" class="login-form__error-banner mb-4" role="alert" aria-live="assertive">
       <div class="login-form__error-content">
         <v-icon icon="mdi-alert-circle" color="white" size="20" class="mr-2" />
         <span>{{ error }}</span>
@@ -10,6 +10,7 @@
       <v-btn
         variant="text"
         class="text-none login-form__retry-btn"
+        aria-label="Повторить попытку входа"
         :disabled="loading"
         @click="handleRetry"
       >
