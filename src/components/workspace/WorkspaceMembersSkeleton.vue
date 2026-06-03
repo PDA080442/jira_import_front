@@ -9,7 +9,7 @@
       </tr>
     </thead>
     <tbody>
-      <tr v-for="index in 8" :key="index">
+      <tr v-for="index in 6" :key="index">
         <td>
           <div class="d-flex align-center ga-3">
             <v-skeleton-loader type="avatar" width="40" height="40" />

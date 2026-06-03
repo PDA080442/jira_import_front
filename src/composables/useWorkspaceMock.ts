@@ -8,6 +8,7 @@ import {
   declineInvite,
   deleteWorkspace,
   duplicateWorkspace,
+  fetchDashboardData,
   fetchInvite,
   fetchMembers,
   fetchWorkspaces,
@@ -16,7 +17,9 @@ import {
   updateMemberRole,
   updateWorkspace,
   type CreateWorkspacePayload,
+  type DashboardData,
   type InviteMemberPayload,
+  type MockFetchOptions,
   type UpdateWorkspacePayload,
   type WorkspaceMember,
   type WorkspaceRole,
@@ -33,6 +36,7 @@ export const useWorkspaceMock = () => {
   const error = ref('')
   const fieldErrors = ref<Record<string, string>>({})
   const members = ref<WorkspaceMember[]>([])
+  const dashboardData = ref<DashboardData | null>(null)
 
   const resetState = () => {
     error.value = ''
@@ -40,14 +44,31 @@ export const useWorkspaceMock = () => {
   }
 
   const isForceLoading = () => route.query.state === 'loading'
-  const isForceEmpty = () => route.query.state === 'empty'
+  const isForceError = () => route.query.state === 'error'
+
+  const isForceEmptyWorkspaces = () =>
+    route.path === '/workspace/select' && route.query.state === 'empty'
+
+  const isForceEmptyMembers = () =>
+    route.path === '/workspace/members' && route.query.state === 'empty'
+
+  const isForceEmptyDashboard = () => route.path === '/' && route.query.state === 'empty'
+
+  const buildFetchOptions = (overrides?: MockFetchOptions): MockFetchOptions => ({
+    forceLoading: overrides?.forceLoading ?? isForceLoading(),
+    forceError: overrides?.forceError ?? isForceError(),
+    forceEmpty: overrides?.forceEmpty,
+  })
 
   const handleFetchWorkspaces = async () => {
     resetState()
     loading.value = true
 
     try {
-      const result = await fetchWorkspaces(isForceLoading())
+      const result = await fetchWorkspaces({
+        ...buildFetchOptions(),
+        forceEmpty: isForceEmptyWorkspaces(),
+      })
 
       if (!result.ok) {
         error.value = result.message
@@ -55,6 +76,28 @@ export const useWorkspaceMock = () => {
       }
 
       workspaceStore.setWorkspaces(result.data)
+    } finally {
+      loading.value = false
+    }
+  }
+
+  const handleFetchDashboard = async () => {
+    resetState()
+    loading.value = true
+
+    try {
+      const result = await fetchDashboardData({
+        ...buildFetchOptions(),
+        forceEmpty: isForceEmptyDashboard(),
+      })
+
+      if (!result.ok) {
+        error.value = result.message
+        dashboardData.value = null
+        return
+      }
+
+      dashboardData.value = result.data
     } finally {
       loading.value = false
     }
@@ -190,8 +233,8 @@ export const useWorkspaceMock = () => {
 
     try {
       const result = await fetchMembers(id, {
-        forceLoading: isForceLoading(),
-        forceEmpty: isForceEmpty(),
+        ...buildFetchOptions(),
+        forceEmpty: isForceEmptyMembers(),
       })
 
       if (!result.ok) {
@@ -235,7 +278,7 @@ export const useWorkspaceMock = () => {
     loading.value = true
 
     try {
-      return await fetchInvite(token)
+      return await fetchInvite(token, buildFetchOptions())
     } finally {
       loading.value = false
     }
@@ -332,8 +375,10 @@ export const useWorkspaceMock = () => {
     error,
     fieldErrors,
     members,
+    dashboardData,
     resetState,
     handleFetchWorkspaces,
+    handleFetchDashboard,
     handleSelectWorkspace,
     handleCreateWorkspace,
     handleUpdateWorkspace,

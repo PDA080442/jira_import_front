@@ -11,17 +11,28 @@
       </p>
     </div>
 
-    <v-alert
-      v-if="error"
-      type="error"
-      variant="tonal"
-      density="comfortable"
-      class="forgot-password-form__error"
-      closable
-      @click:close="clearError"
-    >
-      {{ error }}
-    </v-alert>
+    <div v-if="error" class="forgot-password-form__error-wrap">
+      <v-alert
+        type="error"
+        variant="tonal"
+        density="comfortable"
+        class="forgot-password-form__error"
+        closable
+        @click:close="clearError"
+      >
+        {{ error }}
+      </v-alert>
+      <v-btn
+        variant="text"
+        color="error"
+        class="text-none forgot-password-form__retry-btn"
+        prepend-icon="mdi-refresh"
+        :disabled="loading"
+        @click="handleRetry"
+      >
+        Повторить
+      </v-btn>
+    </div>
 
     <v-form class="forgot-password-form__form" @submit.prevent="handleSubmit">
       <AuthTextField
@@ -72,6 +83,10 @@ const { loading, error, successMessage, handleForgotPassword, clearError } = use
 const handleSubmit = async () => {
   await handleForgotPassword(email.value)
 }
+
+const handleRetry = async () => {
+  await handleSubmit()
+}
 </script>
 
 <style scoped>
@@ -106,9 +121,24 @@ const handleSubmit = async () => {
   line-height: 1.5;
 }
 
-.forgot-password-form__error {
+.forgot-password-form__error-wrap {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 8px;
   margin-top: 16px;
+}
+
+.forgot-password-form__error {
+  flex: 1;
+  min-width: 0;
+  margin-top: 0;
   text-align: start;
+}
+
+.forgot-password-form__retry-btn {
+  flex-shrink: 0;
+  margin-top: 4px;
 }
 
 .forgot-password-form__form {

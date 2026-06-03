@@ -1,9 +1,7 @@
 <template>
   <AuthLayout>
     <AuthCard :max-width="480">
-      <div v-if="pageLoading" class="accept-invite-page accept-invite-page--loading">
-        <v-progress-circular indeterminate color="primary" />
-      </div>
+      <AcceptInviteSkeleton v-if="pageLoading" />
 
       <div v-else-if="invalidToken" class="accept-invite-page accept-invite-page--error">
         <v-icon icon="mdi-alert-circle-outline" size="48" color="error" class="mb-4" />
@@ -11,7 +9,18 @@
         <p class="accept-invite-page__subtitle">
           {{ error || 'Приглашение недействительно или истекло' }}
         </p>
-        <v-btn color="primary" class="text-none mt-4" to="/auth/login">Войти в аккаунт</v-btn>
+        <div class="accept-invite-page__error-actions">
+          <v-btn
+            variant="outlined"
+            color="primary"
+            class="text-none"
+            prepend-icon="mdi-refresh"
+            @click="loadInvite"
+          >
+            Повторить
+          </v-btn>
+          <v-btn color="primary" class="text-none" to="/auth/login">Войти в аккаунт</v-btn>
+        </div>
       </div>
 
       <div v-else-if="invite" class="accept-invite-page">
@@ -89,6 +98,7 @@ import { onMounted, ref } from 'vue'
 import { RouterLink, useRoute } from 'vue-router'
 
 import AuthCard from '@/components/auth/AuthCard.vue'
+import AcceptInviteSkeleton from '@/components/workspace/AcceptInviteSkeleton.vue'
 import WorkspaceRoleBadge from '@/components/workspace/WorkspaceRoleBadge.vue'
 import { useWorkspaceMock } from '@/composables/useWorkspaceMock'
 import AuthLayout from '@/layouts/AuthLayout.vue'
@@ -104,6 +114,7 @@ const invite = ref<WorkspaceInvite | null>(null)
 
 const loadInvite = async () => {
   pageLoading.value = true
+  invalidToken.value = false
   const token = String(route.query.token ?? '')
 
   const result = await handleFetchInvite(token)
@@ -151,12 +162,19 @@ onMounted(() => {
   text-align: center;
 }
 
-.accept-invite-page--loading,
 .accept-invite-page--error {
   display: flex;
   flex-direction: column;
   align-items: center;
   padding: 24px 0;
+}
+
+.accept-invite-page__error-actions {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 12px;
+  margin-top: 16px;
 }
 
 .accept-invite-page__icon {

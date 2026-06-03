@@ -15,7 +15,7 @@
       <section class="workspace-dashboard__welcome">
         <div class="workspace-dashboard__welcome-text">
           <h2 class="workspace-dashboard__welcome-title">Добро пожаловать, Alex</h2>
-          <p class="workspace-dashboard__welcome-subtitle">Acme Dev Team · 24 импорта за месяц</p>
+          <p class="workspace-dashboard__welcome-subtitle">{{ welcomeSubtitle }}</p>
         </div>
         <div class="workspace-dashboard__welcome-actions">
           <v-btn
@@ -39,133 +39,153 @@
         </div>
       </section>
 
-      <section class="workspace-dashboard__stats">
-        <article
-          v-for="stat in stats"
-          :key="stat.label"
-          class="workspace-dashboard__stat-card"
-          :class="`workspace-dashboard__stat-card--${stat.tone}`"
-        >
-          <div class="workspace-dashboard__stat-content">
-            <span class="workspace-dashboard__stat-label">{{ stat.label }}</span>
-            <span class="workspace-dashboard__stat-value">{{ stat.value }}</span>
-          </div>
-          <div
-            class="workspace-dashboard__stat-icon"
-            :class="`workspace-dashboard__stat-icon--${stat.tone}`"
+      <DashboardSkeleton v-if="loading" />
+
+      <PageErrorState
+        v-else-if="error"
+        :description="error"
+        :loading="loading"
+        @retry="handleFetchDashboard"
+      />
+
+      <AppEmptyState
+        v-else-if="isDashboardEmpty"
+        title="Пока нет импортов"
+        description="Создайте первый импорт, чтобы начать работу с данными."
+        action-label="Создать импорт"
+        icon="mdi-database-import-outline"
+        @action="createImportDialogOpen = true"
+      />
+
+      <template v-else>
+        <section class="workspace-dashboard__stats">
+          <article
+            v-for="stat in stats"
+            :key="stat.label"
+            class="workspace-dashboard__stat-card"
+            :class="`workspace-dashboard__stat-card--${stat.tone}`"
           >
-            <v-icon :icon="stat.icon" size="22" />
-          </div>
-        </article>
-      </section>
+            <div class="workspace-dashboard__stat-content">
+              <span class="workspace-dashboard__stat-label">{{ stat.label }}</span>
+              <span class="workspace-dashboard__stat-value">{{ stat.value }}</span>
+            </div>
+            <div
+              class="workspace-dashboard__stat-icon"
+              :class="`workspace-dashboard__stat-icon--${stat.tone}`"
+            >
+              <v-icon :icon="stat.icon" size="22" />
+            </div>
+          </article>
+        </section>
 
-      <v-card
-        variant="flat"
-        rounded="lg"
-        class="workspace-dashboard__card workspace-dashboard__imports"
-      >
-        <div class="workspace-dashboard__card-header">
-          <h3 class="workspace-dashboard__card-title">Последние импорты</h3>
-          <a href="#" class="workspace-dashboard__card-link" @click.prevent>Смотреть все</a>
-        </div>
-
-        <div class="workspace-dashboard__table">
-          <div class="workspace-dashboard__table-head">
-            <span>Name</span>
-            <span>Status</span>
-            <span>Date</span>
-            <span class="workspace-dashboard__table-head-action" />
-          </div>
-          <button
-            v-for="item in recentImports"
-            :key="item.name"
-            type="button"
-            class="workspace-dashboard__table-row"
-          >
-            <span class="workspace-dashboard__table-name">{{ item.name }}</span>
-            <span class="workspace-dashboard__table-status">
-              <span
-                class="workspace-dashboard__status-pill"
-                :class="`workspace-dashboard__status-pill--${item.statusTone}`"
-              >
-                {{ item.status }}
-              </span>
-            </span>
-            <span class="workspace-dashboard__table-date">{{ item.date }}</span>
-            <span class="workspace-dashboard__table-chevron">
-              <v-icon icon="mdi-chevron-right" size="20" color="#a8a29e" />
-            </span>
-          </button>
-        </div>
-      </v-card>
-
-      <section class="workspace-dashboard__bottom">
         <v-card
           variant="flat"
           rounded="lg"
-          class="workspace-dashboard__card workspace-dashboard__chart-card"
+          class="workspace-dashboard__card workspace-dashboard__imports"
         >
           <div class="workspace-dashboard__card-header">
-            <h3 class="workspace-dashboard__card-title">Импорты по неделям</h3>
+            <h3 class="workspace-dashboard__card-title">Последние импорты</h3>
             <a href="#" class="workspace-dashboard__card-link" @click.prevent>Смотреть все</a>
           </div>
 
-          <div class="workspace-dashboard__chart">
-            <div class="workspace-dashboard__chart-y-axis">
-              <span v-for="tick in chartYTicks" :key="tick">{{ tick }}</span>
+          <div class="workspace-dashboard__table">
+            <div class="workspace-dashboard__table-head">
+              <span>Name</span>
+              <span>Status</span>
+              <span>Date</span>
+              <span class="workspace-dashboard__table-head-action" />
             </div>
-            <div class="workspace-dashboard__chart-body">
-              <div class="workspace-dashboard__chart-bars">
-                <div
-                  v-for="(bar, index) in weeklyChart"
-                  :key="bar.label"
-                  class="workspace-dashboard__chart-bar-wrap"
-                >
-                  <div
-                    class="workspace-dashboard__chart-bar"
-                    :style="{ height: `${(bar.value / chartMax) * 100}%` }"
-                  />
-                  <span class="workspace-dashboard__chart-bar-label">{{ bar.label }}</span>
-                </div>
-              </div>
-            </div>
-          </div>
-        </v-card>
-
-        <v-card
-          variant="flat"
-          rounded="lg"
-          class="workspace-dashboard__card workspace-dashboard__errors-card"
-        >
-          <div class="workspace-dashboard__card-header">
-            <h3 class="workspace-dashboard__card-title">Последние ошибки</h3>
-          </div>
-
-          <div class="workspace-dashboard__errors">
             <button
-              v-for="error in recentErrors"
-              :key="error.file"
+              v-for="item in recentImports"
+              :key="item.name"
               type="button"
-              class="workspace-dashboard__error-item"
+              class="workspace-dashboard__table-row"
             >
-              <v-icon
-                icon="mdi-alert-circle"
-                size="22"
-                color="#ef4444"
-                class="workspace-dashboard__error-icon"
-              />
-              <span class="workspace-dashboard__error-content">
-                <span class="workspace-dashboard__error-file">{{ error.file }}</span>
-                <span class="workspace-dashboard__error-message">{{ error.message }}</span>
+              <span class="workspace-dashboard__table-name">{{ item.name }}</span>
+              <span class="workspace-dashboard__table-status">
+                <span
+                  class="workspace-dashboard__status-pill"
+                  :class="`workspace-dashboard__status-pill--${item.statusTone}`"
+                >
+                  {{ item.status }}
+                </span>
               </span>
-              <span class="workspace-dashboard__error-meta">
-                <span class="workspace-dashboard__error-date">{{ error.date }}</span>
+              <span class="workspace-dashboard__table-date">{{ item.date }}</span>
+              <span class="workspace-dashboard__table-chevron">
                 <v-icon icon="mdi-chevron-right" size="20" color="#a8a29e" />
               </span>
             </button>
           </div>
         </v-card>
-      </section>
+
+        <section class="workspace-dashboard__bottom">
+          <v-card
+            variant="flat"
+            rounded="lg"
+            class="workspace-dashboard__card workspace-dashboard__chart-card"
+          >
+            <div class="workspace-dashboard__card-header">
+              <h3 class="workspace-dashboard__card-title">Импорты по неделям</h3>
+              <a href="#" class="workspace-dashboard__card-link" @click.prevent>Смотреть все</a>
+            </div>
+
+            <div class="workspace-dashboard__chart">
+              <div class="workspace-dashboard__chart-y-axis">
+                <span v-for="tick in chartYTicks" :key="tick">{{ tick }}</span>
+              </div>
+              <div class="workspace-dashboard__chart-body">
+                <div class="workspace-dashboard__chart-bars">
+                  <div
+                    v-for="(bar, index) in weeklyChart"
+                    :key="bar.label"
+                    class="workspace-dashboard__chart-bar-wrap"
+                  >
+                    <div
+                      class="workspace-dashboard__chart-bar"
+                      :style="{ height: `${(bar.value / chartMax) * 100}%` }"
+                    />
+                    <span class="workspace-dashboard__chart-bar-label">{{ bar.label }}</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </v-card>
+
+          <v-card
+            variant="flat"
+            rounded="lg"
+            class="workspace-dashboard__card workspace-dashboard__errors-card"
+          >
+            <div class="workspace-dashboard__card-header">
+              <h3 class="workspace-dashboard__card-title">Последние ошибки</h3>
+            </div>
+
+            <div class="workspace-dashboard__errors">
+              <button
+                v-for="error in recentErrors"
+                :key="error.file"
+                type="button"
+                class="workspace-dashboard__error-item"
+              >
+                <v-icon
+                  icon="mdi-alert-circle"
+                  size="22"
+                  color="#ef4444"
+                  class="workspace-dashboard__error-icon"
+                />
+                <span class="workspace-dashboard__error-content">
+                  <span class="workspace-dashboard__error-file">{{ error.file }}</span>
+                  <span class="workspace-dashboard__error-message">{{ error.message }}</span>
+                </span>
+                <span class="workspace-dashboard__error-meta">
+                  <span class="workspace-dashboard__error-date">{{ error.date }}</span>
+                  <v-icon icon="mdi-chevron-right" size="20" color="#a8a29e" />
+                </span>
+              </button>
+            </div>
+          </v-card>
+        </section>
+      </template>
 
       <CreateImportDialog v-model="createImportDialogOpen" />
       <InviteMemberDialog v-model="inviteDialogOpen" />
@@ -174,101 +194,45 @@
 </template>
 
 <script setup lang="ts">
-import { onMounted, ref, watch } from 'vue'
+import { computed, onMounted, ref, watch } from 'vue'
 import { useRoute } from 'vue-router'
 
+import AppEmptyState from '@/components/common/AppEmptyState.vue'
+import PageErrorState from '@/components/common/PageErrorState.vue'
 import CreateImportDialog from '@/components/workspace/CreateImportDialog.vue'
+import DashboardSkeleton from '@/components/workspace/DashboardSkeleton.vue'
 import InviteMemberDialog from '@/components/workspace/InviteMemberDialog.vue'
+import { useWorkspaceMock } from '@/composables/useWorkspaceMock'
 import AppLayout from '@/layouts/AppLayout.vue'
-
-type StatTone = 'total' | 'success' | 'error' | 'progress'
-type StatusTone = 'success' | 'error' | 'progress'
 
 const route = useRoute()
 const createImportDialogOpen = ref(false)
 const inviteDialogOpen = ref(false)
 
-const stats: Array<{
-  label: string
-  value: string
-  tone: StatTone
-  icon: string
-}> = [
-  { label: 'Всего', value: '24', tone: 'total', icon: 'mdi-database-outline' },
-  { label: 'Успешных', value: '18', tone: 'success', icon: 'mdi-check-circle-outline' },
-  { label: 'Ошибок', value: '4', tone: 'error', icon: 'mdi-alert-outline' },
-  { label: 'В процессе', value: '2', tone: 'progress', icon: 'mdi-clock-outline' },
-]
+const { loading, error, dashboardData, handleFetchDashboard } = useWorkspaceMock()
 
-const recentImports: Array<{
-  name: string
-  status: string
-  statusTone: StatusTone
-  date: string
-}> = [
-  {
-    name: 'customers_2024_05.csv',
-    status: 'Успешно',
-    statusTone: 'success',
-    date: '24 мая 2024, 14:32',
-  },
-  {
-    name: 'orders_2024_05.csv',
-    status: 'Успешно',
-    statusTone: 'success',
-    date: '24 мая 2024, 13:15',
-  },
-  {
-    name: 'products_update.csv',
-    status: 'Ошибка',
-    statusTone: 'error',
-    date: '24 мая 2024, 11:07',
-  },
-  {
-    name: 'inventory_2024_05.csv',
-    status: 'В процессе',
-    statusTone: 'progress',
-    date: '24 мая 2024, 10:42',
-  },
-  {
-    name: 'prices_2024_05.csv',
-    status: 'Успешно',
-    statusTone: 'success',
-    date: '23 мая 2024, 18:22',
-  },
-]
+const welcomeSubtitle = computed(
+  () => dashboardData.value?.welcomeSubtitle ?? 'Acme Dev Team · загрузка…',
+)
 
-const recentErrors = [
-  {
-    file: 'products_update.csv',
-    message: "Неверный формат данных в колонке 'price'",
-    date: '24 мая 2024, 11:07',
-  },
-  {
-    file: 'customers_import.csv',
-    message: "Отсутствует обязательное поле 'email'",
-    date: '23 мая 2024, 16:45',
-  },
-  {
-    file: 'orders_backup.csv',
-    message: "Дублирующиеся значения в поле 'order_id'",
-    date: '22 мая 2024, 09:18',
-  },
-]
+const stats = computed(() => dashboardData.value?.stats ?? [])
+const recentImports = computed(() => dashboardData.value?.recentImports ?? [])
+const recentErrors = computed(() => dashboardData.value?.recentErrors ?? [])
+const weeklyChart = computed(() => dashboardData.value?.weeklyChart ?? [])
+const chartMax = computed(() => dashboardData.value?.chartMax ?? 15)
 
-const chartYTicks = [15, 10, 5, 0]
-const chartMax = 15
+const chartYTicks = computed(() => {
+  const max = chartMax.value
+  return [max, Math.round((max * 2) / 3), Math.round(max / 3), 0]
+})
 
-const weeklyChart = [
-  { label: '15 апр', value: 8 },
-  { label: '22 апр', value: 12 },
-  { label: '29 апр', value: 6 },
-  { label: '6 мая', value: 14 },
-  { label: '13 мая', value: 10 },
-  { label: '20 мая', value: 15 },
-]
+const isDashboardEmpty = computed(
+  () => dashboardData.value !== null && dashboardData.value.recentImports.length === 0,
+)
 
 onMounted(() => {
+  handleFetchDashboard()
+
   if (route.query.invite === '1') {
     inviteDialogOpen.value = true
   }

@@ -22,7 +22,23 @@
 
       <WorkspaceSearchField v-model="searchQuery" class="workspace-select-page__search" />
 
-      <WorkspaceSkeletonGrid v-if="loading" :count="3" />
+      <WorkspaceSkeletonGrid v-if="loading" />
+
+      <PageErrorState
+        v-else-if="error"
+        :description="error"
+        :loading="loading"
+        @retry="handleFetchWorkspaces"
+      />
+
+      <AppEmptyState
+        v-else-if="workspaceStore.workspaces.length === 0"
+        title="Нет workspace"
+        description="Создайте первый workspace, чтобы начать импорт данных."
+        action-label="Создать workspace"
+        icon="mdi-office-building-outline"
+        @action="isCreateDialogOpen = true"
+      />
 
       <div v-else class="workspace-select-page__grid">
         <WorkspaceCard
@@ -65,6 +81,8 @@
 import { computed, onMounted, ref, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 
+import AppEmptyState from '@/components/common/AppEmptyState.vue'
+import PageErrorState from '@/components/common/PageErrorState.vue'
 import DeleteWorkspaceDialog from '@/components/workspace/DeleteWorkspaceDialog.vue'
 import WorkspaceCard from '@/components/workspace/WorkspaceCard.vue'
 import WorkspaceContextMenu from '@/components/workspace/WorkspaceContextMenu.vue'
@@ -80,7 +98,7 @@ import { useWorkspaceStore } from '@/stores/workspace'
 const route = useRoute()
 const router = useRouter()
 const workspaceStore = useWorkspaceStore()
-const { loading, handleFetchWorkspaces, handleDeleteWorkspace, handleDuplicateWorkspace } =
+const { loading, error, handleFetchWorkspaces, handleDeleteWorkspace, handleDuplicateWorkspace } =
   useWorkspaceMock()
 
 const searchQuery = ref('')

@@ -8,17 +8,27 @@
         Зарегистрируйтесь, чтобы начать импортировать ваши задачи и управлять проектами
       </p>
 
-      <v-alert
-        v-if="error"
-        type="error"
-        variant="tonal"
-        density="comfortable"
-        class="mt-4"
-        closable
-        @click:close="clearError"
-      >
-        {{ error }}
-      </v-alert>
+      <div v-if="error" class="register-form__error mt-4">
+        <v-alert
+          type="error"
+          variant="tonal"
+          density="comfortable"
+          closable
+          @click:close="clearError"
+        >
+          {{ error }}
+        </v-alert>
+        <v-btn
+          variant="text"
+          color="error"
+          class="text-none register-form__retry-btn"
+          prepend-icon="mdi-refresh"
+          :disabled="loading"
+          @click="handleRetry"
+        >
+          Повторить
+        </v-btn>
+      </div>
     </div>
 
     <v-form class="register-form__form" @submit.prevent="handleSubmit">
@@ -162,6 +172,10 @@ const handleSubmit = async () => {
     termsAccepted: termsAccepted.value,
   })
 }
+
+const handleRetry = async () => {
+  await handleSubmit()
+}
 </script>
 
 <style scoped>
@@ -187,6 +201,23 @@ const handleSubmit = async () => {
 .register-form__subtitle {
   margin-bottom: 0;
   text-align: center;
+}
+
+.register-form__error {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.register-form__error :deep(.v-alert) {
+  flex: 1;
+  min-width: 0;
+}
+
+.register-form__retry-btn {
+  flex-shrink: 0;
+  margin-top: 4px;
 }
 
 .register-form__form {

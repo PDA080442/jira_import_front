@@ -56,6 +56,49 @@ export type MockResult<T> =
   | { ok: true; data: T }
   | { ok: false; message: string; fieldErrors?: Record<string, string> }
 
+export interface MockFetchOptions {
+  forceLoading?: boolean
+  forceEmpty?: boolean
+  forceError?: boolean
+}
+
+export type DashboardStatTone = 'total' | 'success' | 'error' | 'progress'
+export type DashboardStatusTone = 'success' | 'error' | 'progress'
+
+export interface DashboardStat {
+  label: string
+  value: string
+  tone: DashboardStatTone
+  icon: string
+}
+
+export interface DashboardImport {
+  name: string
+  status: string
+  statusTone: DashboardStatusTone
+  date: string
+}
+
+export interface DashboardErrorItem {
+  file: string
+  message: string
+  date: string
+}
+
+export interface DashboardChartBar {
+  label: string
+  value: number
+}
+
+export interface DashboardData {
+  welcomeSubtitle: string
+  stats: DashboardStat[]
+  recentImports: DashboardImport[]
+  recentErrors: DashboardErrorItem[]
+  weeklyChart: DashboardChartBar[]
+  chartMax: number
+}
+
 const MOCK_WORKSPACES: Workspace[] = [
   {
     id: 'ws-1',
@@ -139,9 +182,135 @@ const delay = (ms = MOCK_DELAY_MS) => new Promise((resolve) => setTimeout(resolv
 const resolveDelay = (forceLoading?: boolean) =>
   delay(forceLoading ? MOCK_LOADING_DELAY_MS : MOCK_DELAY_MS)
 
-export const fetchWorkspaces = async (forceLoading = false): Promise<MockResult<Workspace[]>> => {
-  await resolveDelay(forceLoading)
+const resolveFetchOptions = (options?: MockFetchOptions | boolean): MockFetchOptions => {
+  if (typeof options === 'boolean') {
+    return { forceLoading: options }
+  }
+
+  return options ?? {}
+}
+
+const MOCK_DASHBOARD_DATA: DashboardData = {
+  welcomeSubtitle: 'Acme Dev Team · 24 импорта за месяц',
+  stats: [
+    { label: 'Всего', value: '24', tone: 'total', icon: 'mdi-database-outline' },
+    { label: 'Успешных', value: '18', tone: 'success', icon: 'mdi-check-circle-outline' },
+    { label: 'Ошибок', value: '4', tone: 'error', icon: 'mdi-alert-outline' },
+    { label: 'В процессе', value: '2', tone: 'progress', icon: 'mdi-clock-outline' },
+  ],
+  recentImports: [
+    {
+      name: 'customers_2024_05.csv',
+      status: 'Успешно',
+      statusTone: 'success',
+      date: '24 мая 2024, 14:32',
+    },
+    {
+      name: 'orders_2024_05.csv',
+      status: 'Успешно',
+      statusTone: 'success',
+      date: '24 мая 2024, 13:15',
+    },
+    {
+      name: 'products_update.csv',
+      status: 'Ошибка',
+      statusTone: 'error',
+      date: '24 мая 2024, 11:07',
+    },
+    {
+      name: 'inventory_2024_05.csv',
+      status: 'В процессе',
+      statusTone: 'progress',
+      date: '24 мая 2024, 10:42',
+    },
+    {
+      name: 'prices_2024_05.csv',
+      status: 'Успешно',
+      statusTone: 'success',
+      date: '23 мая 2024, 18:22',
+    },
+  ],
+  recentErrors: [
+    {
+      file: 'products_update.csv',
+      message: "Неверный формат данных в колонке 'price'",
+      date: '24 мая 2024, 11:07',
+    },
+    {
+      file: 'customers_import.csv',
+      message: "Отсутствует обязательное поле 'email'",
+      date: '23 мая 2024, 16:45',
+    },
+    {
+      file: 'orders_backup.csv',
+      message: "Дублирующиеся значения в поле 'order_id'",
+      date: '22 мая 2024, 09:18',
+    },
+  ],
+  weeklyChart: [
+    { label: '15 апр', value: 8 },
+    { label: '22 апр', value: 12 },
+    { label: '29 апр', value: 6 },
+    { label: '6 мая', value: 14 },
+    { label: '13 мая', value: 10 },
+    { label: '20 мая', value: 15 },
+  ],
+  chartMax: 15,
+}
+
+const EMPTY_DASHBOARD_DATA: DashboardData = {
+  welcomeSubtitle: 'Acme Dev Team · 0 импортов за месяц',
+  stats: [
+    { label: 'Всего', value: '0', tone: 'total', icon: 'mdi-database-outline' },
+    { label: 'Успешных', value: '0', tone: 'success', icon: 'mdi-check-circle-outline' },
+    { label: 'Ошибок', value: '0', tone: 'error', icon: 'mdi-alert-outline' },
+    { label: 'В процессе', value: '0', tone: 'progress', icon: 'mdi-clock-outline' },
+  ],
+  recentImports: [],
+  recentErrors: [],
+  weeklyChart: [
+    { label: '15 апр', value: 0 },
+    { label: '22 апр', value: 0 },
+    { label: '29 апр', value: 0 },
+    { label: '6 мая', value: 0 },
+    { label: '13 мая', value: 0 },
+    { label: '20 мая', value: 0 },
+  ],
+  chartMax: 15,
+}
+
+export const fetchWorkspaces = async (
+  options?: MockFetchOptions | boolean,
+): Promise<MockResult<Workspace[]>> => {
+  const opts = resolveFetchOptions(options)
+  await resolveDelay(opts.forceLoading)
+
+  if (opts.forceError) {
+    return { ok: false, message: 'Не удалось загрузить список workspace' }
+  }
+
+  if (opts.forceEmpty) {
+    return { ok: true, data: [] }
+  }
+
   return { ok: true, data: [...MOCK_WORKSPACES] }
+}
+
+export const fetchDashboardData = async (
+  options?: MockFetchOptions,
+): Promise<MockResult<DashboardData>> => {
+  const opts = resolveFetchOptions(options)
+  await resolveDelay(opts.forceLoading)
+
+  if (opts.forceError) {
+    return { ok: false, message: 'Не удалось загрузить данные дашборда' }
+  }
+
+  if (opts.forceEmpty) {
+    return { ok: true, data: { ...EMPTY_DASHBOARD_DATA } }
+  }
+
+  return { ok: true, data: { ...MOCK_DASHBOARD_DATA } }
 }
 
 const validateWorkspacePayload = (
@@ -315,11 +484,16 @@ export const duplicateWorkspace = async (workspaceId: string): Promise<MockResul
 
 export const fetchMembers = async (
   workspaceId: string,
-  options?: { forceLoading?: boolean; forceEmpty?: boolean },
+  options?: MockFetchOptions,
 ): Promise<MockResult<WorkspaceMember[]>> => {
-  await resolveDelay(options?.forceLoading)
+  const opts = resolveFetchOptions(options)
+  await resolveDelay(opts.forceLoading)
 
-  if (options?.forceEmpty) {
+  if (opts.forceError) {
+    return { ok: false, message: 'Не удалось загрузить список участников' }
+  }
+
+  if (opts.forceEmpty) {
     return { ok: true, data: [] }
   }
 
@@ -354,8 +528,16 @@ export const inviteMember = async (
   return { ok: true, data: { message: 'Приглашение отправлено' } }
 }
 
-export const fetchInvite = async (token: string): Promise<MockResult<WorkspaceInvite>> => {
-  await delay()
+export const fetchInvite = async (
+  token: string,
+  options?: MockFetchOptions,
+): Promise<MockResult<WorkspaceInvite>> => {
+  const opts = resolveFetchOptions(options)
+  await resolveDelay(opts.forceLoading)
+
+  if (opts.forceError) {
+    return { ok: false, message: 'Не удалось загрузить приглашение' }
+  }
 
   if (!token?.trim() || token !== MOCK_INVITE_TOKEN) {
     return { ok: false, message: 'Приглашение недействительно или истекло' }

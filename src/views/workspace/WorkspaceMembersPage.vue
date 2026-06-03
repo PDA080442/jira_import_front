@@ -17,6 +17,13 @@
 
       <WorkspaceMembersSkeleton v-if="loading" />
 
+      <PageErrorState
+        v-else-if="error"
+        :description="error"
+        :loading="loading"
+        @retry="handleFetchMembers"
+      />
+
       <WorkspaceEmptyState v-else-if="members.length === 0" @invite="inviteDialogOpen = true" />
 
       <template v-else>
@@ -43,6 +50,7 @@
 <script setup lang="ts">
 import { onMounted, ref } from 'vue'
 
+import PageErrorState from '@/components/common/PageErrorState.vue'
 import DeleteMemberDialog from '@/components/workspace/DeleteMemberDialog.vue'
 import InviteMemberDialog from '@/components/workspace/InviteMemberDialog.vue'
 import WorkspaceEmptyState from '@/components/workspace/WorkspaceEmptyState.vue'
@@ -58,6 +66,7 @@ import { useWorkspaceStore } from '@/stores/workspace'
 const workspaceStore = useWorkspaceStore()
 const {
   loading,
+  error,
   members,
   handleFetchWorkspaces,
   handleFetchMembers,
