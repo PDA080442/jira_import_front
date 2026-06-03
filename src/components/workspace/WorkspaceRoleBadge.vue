@@ -5,7 +5,7 @@
 </template>
 
 <script setup lang="ts">
-import type { WorkspaceRole } from '@/mocks/workspace'
+import type { WorkspaceRole } from '@/models/workspace'
 
 defineProps<{
   role: WorkspaceRole

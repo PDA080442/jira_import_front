@@ -90,7 +90,7 @@
           placeholder="Повторите пароль"
           prepend-inner-icon="mdi-lock-check-outline"
           :disabled="loading"
-          :error-messages="fieldErrors.passwordConfirm"
+          :error-messages="fieldErrors.password_confirm || fieldErrors.passwordConfirm"
         >
           <template #append-inner>
             <v-btn
@@ -131,7 +131,7 @@ import { onMounted, ref } from 'vue'
 import { RouterLink, useRoute } from 'vue-router'
 
 import AuthTextField from '@/components/auth/AuthTextField.vue'
-import { useAuthMock } from '@/composables/useAuthMock'
+import { useAuth } from '@/composables/useAuth'
 
 const route = useRoute()
 const password = ref('')
@@ -148,7 +148,7 @@ const {
   handleValidateResetToken,
   handleResetPassword,
   clearError,
-} = useAuthMock()
+} = useAuth()
 
 const getToken = () => {
   const token = route.query.token

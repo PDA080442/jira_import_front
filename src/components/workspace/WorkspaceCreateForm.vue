@@ -20,41 +20,21 @@
     </div>
 
     <div class="workspace-create-form__field">
-      <label class="workspace-create-form__label">
-        URL slug <span class="workspace-create-form__required">*</span>
-      </label>
+      <label class="workspace-create-form__label">URL slug</label>
       <div class="workspace-create-form__slug">
         <span class="workspace-create-form__slug-prefix">forest-trust.io/workspace/</span>
         <v-text-field
-          v-model="slug"
-          placeholder="workspace-name"
+          :model-value="slugPreview"
           variant="outlined"
           hide-details="auto"
-          :error-messages="fieldErrors.slug"
+          readonly
           :disabled="loading"
           class="workspace-create-form__slug-input"
-          @update:model-value="handleSlugChange"
         />
       </div>
       <div class="workspace-create-form__hint">
         <v-icon icon="mdi-information-outline" size="14" color="grey" />
-        Уникальный URL для вашего workspace. Используйте только латинские буквы, цифры и дефисы.
-      </div>
-    </div>
-
-    <div class="workspace-create-form__field">
-      <label class="workspace-create-form__label">Описание (необязательно)</label>
-      <v-textarea
-        v-model="description"
-        placeholder="Кратко опишите цель и задачи этого workspace"
-        variant="outlined"
-        rows="4"
-        hide-details
-        :disabled="loading"
-      />
-      <div class="workspace-create-form__hint">
-        <v-icon icon="mdi-information-outline" size="14" color="grey" />
-        Описание поможет участникам понять, для чего используется этот workspace.
+        Slug создаётся автоматически на сервере при создании workspace.
       </div>
     </div>
 
@@ -72,60 +52,50 @@
 <script setup lang="ts">
 import { computed, ref, watch } from 'vue'
 
-import { useWorkspaceMock } from '@/composables/useWorkspaceMock'
-import { slugify, type Workspace } from '@/mocks/workspace'
+import { useWorkspace } from '@/composables/useWorkspace'
+import { slugify, type WorkspaceListItem } from '@/models/workspace'
 
 const props = defineProps<{
-  workspace?: Workspace | null
+  workspace?: WorkspaceListItem | null
 }>()
 
 const emit = defineEmits<{
   cancel: []
-  success: [workspace: Workspace]
+  success: [workspace: WorkspaceListItem]
 }>()
 
 const { loading, fieldErrors, handleCreateWorkspace, handleUpdateWorkspace, resetState } =
-  useWorkspaceMock()
+  useWorkspace()
 
 const name = ref('')
-const slug = ref('')
-const description = ref('')
-const slugManuallyEdited = ref(false)
 
 const isEditMode = computed(() => Boolean(props.workspace))
 const submitLabel = computed(() => (isEditMode.value ? 'Сохранить' : 'Создать workspace'))
+const slugPreview = computed(() => {
+  if (isEditMode.value && props.workspace) {
+    return props.workspace.slug
+  }
 
-const fillForm = (workspace: Workspace | null | undefined) => {
+  return slugify(name.value) || 'workspace-name'
+})
+
+const fillForm = (workspace: WorkspaceListItem | null | undefined) => {
   if (!workspace) {
     resetForm()
     return
   }
 
   name.value = workspace.name
-  slug.value = workspace.slug
-  description.value = workspace.description ?? ''
-  slugManuallyEdited.value = true
   resetState()
 }
 
 const resetForm = () => {
   name.value = ''
-  slug.value = ''
-  description.value = ''
-  slugManuallyEdited.value = false
   resetState()
 }
 
-const handleNameChange = (value: string) => {
-  if (isEditMode.value || slugManuallyEdited.value) {
-    return
-  }
-
-  slug.value = slugify(value)
-}
-
-const handleSlugChange = () => {
-  slugManuallyEdited.value = true
+const handleNameChange = () => {
+  // Slug preview updates reactively via computed.
 }
 
 const handleSubmit = async () => {
@@ -133,8 +103,6 @@ const handleSubmit = async () => {
     const workspace = await handleUpdateWorkspace({
       id: props.workspace.id,
       name: name.value,
-      slug: slug.value,
-      description: description.value,
     })
 
     if (workspace) {
@@ -145,14 +113,7 @@ const handleSubmit = async () => {
     return
   }
 
-  const workspace = await handleCreateWorkspace(
-    {
-      name: name.value,
-      slug: slug.value,
-      description: description.value,
-    },
-    { redirect: false },
-  )
+  const workspace = await handleCreateWorkspace({ name: name.value }, { redirect: false })
 
   if (workspace) {
     emit('success', workspace)

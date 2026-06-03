@@ -59,9 +59,9 @@ import WorkspaceEmptyState from '@/components/workspace/WorkspaceEmptyState.vue'
 import WorkspaceMembersHeader from '@/components/workspace/WorkspaceMembersHeader.vue'
 import WorkspaceMembersSkeleton from '@/components/workspace/WorkspaceMembersSkeleton.vue'
 import WorkspaceMembersTable from '@/components/workspace/WorkspaceMembersTable.vue'
-import { useWorkspaceMock } from '@/composables/useWorkspaceMock'
+import { useWorkspace } from '@/composables/useWorkspace'
 import AppLayout from '@/layouts/AppLayout.vue'
-import type { WorkspaceRole } from '@/mocks/workspace'
+import type { WorkspaceRole } from '@/models/workspace'
 
 import { useWorkspaceStore } from '@/stores/workspace'
 
@@ -74,7 +74,7 @@ const {
   handleFetchMembers,
   handleUpdateMemberRole,
   handleRemoveMember,
-} = useWorkspaceMock()
+} = useWorkspace()
 
 const inviteDialogOpen = ref(false)
 const deleteDialogOpen = ref(false)

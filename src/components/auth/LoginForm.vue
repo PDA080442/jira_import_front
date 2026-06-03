@@ -94,13 +94,13 @@ import { RouterLink } from 'vue-router'
 import AuthDivider from '@/components/auth/AuthDivider.vue'
 import AuthLogo from '@/components/auth/AuthLogo.vue'
 import AuthTextField from '@/components/auth/AuthTextField.vue'
-import { useAuthMock } from '@/composables/useAuthMock'
+import { useAuth } from '@/composables/useAuth'
 
 const email = ref('demo@example.com')
 const password = ref('demo1234')
 const showPassword = ref(false)
 
-const { loading, error, handleLogin } = useAuthMock()
+const { loading, error, handleLogin } = useAuth()
 
 const handleSubmit = async () => {
   await handleLogin({

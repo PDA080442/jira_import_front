@@ -56,10 +56,10 @@
 import { computed, ref } from 'vue'
 
 import WorkspaceRoleBadge from '@/components/workspace/WorkspaceRoleBadge.vue'
-import type { Workspace, WorkspaceIcon } from '@/mocks/workspace'
+import type { WorkspaceListItem, WorkspaceIcon } from '@/models/workspace'
 
 const props = defineProps<{
-  workspace: Workspace
+  workspace: WorkspaceListItem
   selected?: boolean
 }>()
 

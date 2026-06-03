@@ -105,17 +105,17 @@ import { RouterLink, useRoute } from 'vue-router'
 import AuthCard from '@/components/auth/AuthCard.vue'
 import AcceptInviteSkeleton from '@/components/workspace/AcceptInviteSkeleton.vue'
 import WorkspaceRoleBadge from '@/components/workspace/WorkspaceRoleBadge.vue'
-import { useWorkspaceMock } from '@/composables/useWorkspaceMock'
+import { useWorkspace } from '@/composables/useWorkspace'
 import AuthLayout from '@/layouts/AuthLayout.vue'
-import type { WorkspaceInvite } from '@/mocks/workspace'
+import type { AcceptInviteView } from '@/models/workspace'
 
 const route = useRoute()
-const { error, handleFetchInvite, handleAcceptInvite, handleDeclineInvite } = useWorkspaceMock()
+const { error, handleFetchInvite, handleAcceptInvite, handleDeclineInvite } = useWorkspace()
 
 const pageLoading = ref(true)
 const actionLoading = ref(false)
 const invalidToken = ref(false)
-const invite = ref<WorkspaceInvite | null>(null)
+const invite = ref<AcceptInviteView | null>(null)
 
 const loadInvite = async () => {
   pageLoading.value = true

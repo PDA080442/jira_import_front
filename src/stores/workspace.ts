@@ -1,19 +1,19 @@
 import { computed, ref } from 'vue'
 import { defineStore } from 'pinia'
 
-import type { Workspace } from '@/mocks/workspace'
+import type { WorkspaceListItem } from '@/models/workspace'
 
 const STORAGE_KEY = 'forest-trust-current-workspace-id'
 
 export const useWorkspaceStore = defineStore('workspace', () => {
-  const workspaces = ref<Workspace[]>([])
-  const currentWorkspaceId = ref<string | null>(sessionStorage.getItem(STORAGE_KEY) ?? 'ws-1')
+  const workspaces = ref<WorkspaceListItem[]>([])
+  const currentWorkspaceId = ref<string | null>(sessionStorage.getItem(STORAGE_KEY))
 
   const selectedWorkspace = computed(
     () => workspaces.value.find((ws) => ws.id === currentWorkspaceId.value) ?? null,
   )
 
-  const setWorkspaces = (items: Workspace[]) => {
+  const setWorkspaces = (items: WorkspaceListItem[]) => {
     workspaces.value = items
   }
 

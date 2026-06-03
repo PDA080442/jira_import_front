@@ -74,11 +74,11 @@ import { ref } from 'vue'
 import { RouterLink } from 'vue-router'
 
 import AuthTextField from '@/components/auth/AuthTextField.vue'
-import { useAuthMock } from '@/composables/useAuthMock'
+import { useAuth } from '@/composables/useAuth'
 
 const email = ref('')
 
-const { loading, error, successMessage, handleForgotPassword, clearError } = useAuthMock()
+const { loading, error, successMessage, handleForgotPassword, clearError } = useAuth()
 
 const handleSubmit = async () => {
   await handleForgotPassword(email.value)

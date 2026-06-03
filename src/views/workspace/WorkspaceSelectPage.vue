@@ -92,16 +92,16 @@ import WorkspaceCreateDialog from '@/components/workspace/WorkspaceCreateDialog.
 import WorkspaceEditDialog from '@/components/workspace/WorkspaceEditDialog.vue'
 import WorkspaceSearchField from '@/components/workspace/WorkspaceSearchField.vue'
 import WorkspaceSkeletonGrid from '@/components/workspace/WorkspaceSkeletonGrid.vue'
-import { useWorkspaceMock } from '@/composables/useWorkspaceMock'
+import { useWorkspace } from '@/composables/useWorkspace'
 import AppLayout from '@/layouts/AppLayout.vue'
-import type { Workspace } from '@/mocks/workspace'
+import type { WorkspaceListItem } from '@/models/workspace'
 import { useWorkspaceStore } from '@/stores/workspace'
 
 const route = useRoute()
 const router = useRouter()
 const workspaceStore = useWorkspaceStore()
 const { loading, error, handleFetchWorkspaces, handleDeleteWorkspace, handleDuplicateWorkspace } =
-  useWorkspaceMock()
+  useWorkspace()
 
 const searchQuery = ref('')
 const selectedId = ref<string | null>(workspaceStore.currentWorkspaceId)
@@ -110,7 +110,7 @@ const isEditDialogOpen = ref(false)
 const isDeleteDialogOpen = ref(false)
 const isContextMenuOpen = ref(false)
 const actionLoading = ref(false)
-const contextWorkspace = ref<Workspace | null>(null)
+const contextWorkspace = ref<WorkspaceListItem | null>(null)
 const contextMenuTarget = ref<[number, number]>([0, 0])
 
 const filteredWorkspaces = computed(() => {
@@ -128,7 +128,7 @@ const handleCardSelect = (workspaceId: string) => {
   workspaceStore.setCurrentWorkspace(workspaceId)
 }
 
-const handleCardContextMenu = (workspace: Workspace, event: MouseEvent) => {
+const handleCardContextMenu = (workspace: WorkspaceListItem, event: MouseEvent) => {
   contextWorkspace.value = workspace
   contextMenuTarget.value = [event.clientX, event.clientY]
   isContextMenuOpen.value = true
@@ -182,11 +182,11 @@ const handleDeleteConfirm = async () => {
   }
 }
 
-const handleCreateSuccess = (workspace: Workspace) => {
+const handleCreateSuccess = (workspace: WorkspaceListItem) => {
   selectedId.value = workspace.id
 }
 
-const handleEditSuccess = (workspace: Workspace) => {
+const handleEditSuccess = (workspace: WorkspaceListItem) => {
   selectedId.value = workspace.id
 
   if (contextWorkspace.value?.id === workspace.id) {

@@ -225,14 +225,14 @@ import PageErrorState from '@/components/common/PageErrorState.vue'
 import CreateImportDialog from '@/components/workspace/CreateImportDialog.vue'
 import DashboardSkeleton from '@/components/workspace/DashboardSkeleton.vue'
 import InviteMemberDialog from '@/components/workspace/InviteMemberDialog.vue'
-import { useWorkspaceMock } from '@/composables/useWorkspaceMock'
+import { useWorkspace } from '@/composables/useWorkspace'
 import AppLayout from '@/layouts/AppLayout.vue'
 
 const route = useRoute()
 const createImportDialogOpen = ref(false)
 const inviteDialogOpen = ref(false)
 
-const { loading, error, dashboardData, handleFetchDashboard } = useWorkspaceMock()
+const { loading, error, dashboardData, handleFetchDashboard } = useWorkspace()
 
 const welcomeSubtitle = computed(
   () => dashboardData.value?.welcomeSubtitle ?? 'Acme Dev Team · загрузка…',

@@ -91,10 +91,10 @@
 
 <script setup lang="ts">
 import WorkspaceRoleBadge from '@/components/workspace/WorkspaceRoleBadge.vue'
-import type { WorkspaceMember, WorkspaceRole } from '@/mocks/workspace'
+import type { WorkspaceMemberView, WorkspaceRole } from '@/models/workspace'
 
 defineProps<{
-  members: WorkspaceMember[]
+  members: WorkspaceMemberView[]
 }>()
 
 const emit = defineEmits<{

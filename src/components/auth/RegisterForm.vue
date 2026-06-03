@@ -89,7 +89,7 @@
           placeholder="Повторите пароль"
           prepend-inner-icon="mdi-lock-outline"
           :disabled="loading"
-          :error-messages="fieldErrors.passwordConfirm"
+          :error-messages="fieldErrors.password_confirm || fieldErrors.passwordConfirm"
         >
           <template #append-inner>
             <v-btn
@@ -151,7 +151,7 @@ import { RouterLink } from 'vue-router'
 
 import AuthLogo from '@/components/auth/AuthLogo.vue'
 import AuthTextField from '@/components/auth/AuthTextField.vue'
-import { useAuthMock } from '@/composables/useAuthMock'
+import { useAuth } from '@/composables/useAuth'
 
 const name = ref('')
 const email = ref('')
@@ -161,7 +161,7 @@ const termsAccepted = ref(false)
 const showPassword = ref(false)
 const showPasswordConfirm = ref(false)
 
-const { loading, error, fieldErrors, handleRegister, clearError } = useAuthMock()
+const { loading, error, fieldErrors, handleRegister, clearError } = useAuth()
 
 const handleSubmit = async () => {
   await handleRegister({

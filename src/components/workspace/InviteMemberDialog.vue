@@ -86,8 +86,8 @@
 <script setup lang="ts">
 import { ref, watch } from 'vue'
 
-import { useWorkspaceMock } from '@/composables/useWorkspaceMock'
-import type { WorkspaceRole } from '@/mocks/workspace'
+import { useWorkspace } from '@/composables/useWorkspace'
+import type { WorkspaceRole } from '@/models/workspace'
 
 const props = defineProps<{
   modelValue: boolean
@@ -97,7 +97,7 @@ const emit = defineEmits<{
   'update:modelValue': [value: boolean]
 }>()
 
-const { loading, fieldErrors, handleInviteMember, resetState } = useWorkspaceMock()
+const { loading, fieldErrors, handleInviteMember, resetState } = useWorkspace()
 
 const email = ref('')
 const role = ref<WorkspaceRole>('Editor')
@@ -121,7 +121,6 @@ const handleSubmit = async () => {
   const success = await handleInviteMember({
     email: email.value,
     role: role.value,
-    message: message.value,
   })
 
   if (success) {

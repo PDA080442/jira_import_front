@@ -34,7 +34,7 @@
 import { ref, watch } from 'vue'
 
 import WorkspaceCreateForm from '@/components/workspace/WorkspaceCreateForm.vue'
-import type { Workspace } from '@/mocks/workspace'
+import type { WorkspaceListItem } from '@/models/workspace'
 
 const props = defineProps<{
   modelValue: boolean
@@ -42,7 +42,7 @@ const props = defineProps<{
 
 const emit = defineEmits<{
   'update:modelValue': [value: boolean]
-  success: [workspace: Workspace]
+  success: [workspace: WorkspaceListItem]
 }>()
 
 const formRef = ref<InstanceType<typeof WorkspaceCreateForm> | null>(null)
@@ -51,7 +51,7 @@ const handleClose = () => {
   emit('update:modelValue', false)
 }
 
-const handleSuccess = (workspace: Workspace) => {
+const handleSuccess = (workspace: WorkspaceListItem) => {
   emit('success', workspace)
   emit('update:modelValue', false)
 }
