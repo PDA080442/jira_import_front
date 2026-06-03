@@ -27,13 +27,16 @@ withDefaults(
 <style scoped>
 .app-layout {
   display: flex;
-  min-height: 100vh;
+  height: 100vh;
+  overflow: hidden;
   background-color: rgb(var(--v-theme-background));
 }
 
 .app-layout__content {
   flex: 1;
   min-width: 0;
+  height: 100vh;
+  overflow-y: auto;
   padding: 32px 40px;
   background-color: #ffffff;
   transition: width 0.25s ease;
